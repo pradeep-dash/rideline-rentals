@@ -1,0 +1,19 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #14181c;
+  color: #f2f0ea;
+  font-family: "Inter", sans-serif;
+}
+.font-display {
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 0.02em;
+}
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
+input:focus {
+  outline: none;
+}
