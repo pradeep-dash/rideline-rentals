@@ -403,11 +403,19 @@ function PhotoCard({ listing, category, selected, onBook }) {
       className="shrink-0 w-52 sm:w-56 rounded-2xl overflow-hidden flex flex-col"
       style={{ background: COLORS.surface, border: `1px solid ${selected ? COLORS.accent : COLORS.border}`, boxShadow: selected ? `0 8px 24px ${COLORS.glow}` : "0 2px 8px rgba(0,0,0,0.15)" }}
     >
-      <div className="h-32 relative flex items-center justify-center" style={{ background: listing.image_url ? "none" : `linear-gradient(135deg, ${category.tint}, ${COLORS.surface2})` }}>
+      <div className="h-32 relative flex items-center justify-center overflow-hidden" style={{ background: listing.image_url ? "none" : `linear-gradient(135deg, ${category.tint}, ${COLORS.surface2})` }}>
         {listing.image_url ? (
           <img src={listing.image_url} alt={listing.name} className="w-full h-full object-cover" />
         ) : (
-          <Icon size={34} color={COLORS.accent} />
+          <>
+            <div className="absolute inset-0" style={{ opacity: 0.14 }}>
+              <Icon size={26} color={COLORS.text} style={{ position: "absolute", top: 8, left: 10, transform: "rotate(-12deg)" }} />
+              <Icon size={22} color={COLORS.text} style={{ position: "absolute", bottom: 10, left: 46, transform: "rotate(8deg)" }} />
+              <Icon size={30} color={COLORS.text} style={{ position: "absolute", top: 18, right: 14, transform: "rotate(15deg)" }} />
+              <Icon size={20} color={COLORS.text} style={{ position: "absolute", bottom: 14, right: 50, transform: "rotate(-10deg)" }} />
+            </div>
+            <Icon size={38} color={COLORS.accent} style={{ position: "relative", filter: `drop-shadow(0 2px 8px ${COLORS.glow})` }} />
+          </>
         )}
         <span className="absolute top-2 right-2 font-mono text-[10px] px-2 py-1 rounded-full" style={{ background: "rgba(20,24,28,0.75)", color: COLORS.text, backdropFilter: "blur(4px)" }}>
           {listing.tag}{listing.hours ? ` · ${listing.hours}h` : ""}
