@@ -1,12 +1,20 @@
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
-  background: #14181c;
   color: #f2f0ea;
   font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #14181c;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(245, 183, 0, 0.12), transparent 60%),
+    radial-gradient(ellipse 700px 420px at 100% 105%, rgba(37, 211, 102, 0.07), transparent 60%);
+  background-size: 26px 26px, 100% 100%, 100% 100%;
+  background-attachment: fixed;
 }
+
 .font-display {
   font-family: "Bebas Neue", sans-serif;
   letter-spacing: 0.02em;
@@ -14,6 +22,34 @@ body {
 .font-mono {
   font-family: "JetBrains Mono", monospace;
 }
-input:focus {
+
+input:focus,
+select:focus {
   outline: none;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a4450;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
