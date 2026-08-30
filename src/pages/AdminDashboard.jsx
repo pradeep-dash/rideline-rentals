@@ -4,7 +4,7 @@ import { LogOut, Plus, Pencil, Trash2, X, Loader2, ListChecks, CalendarDays } fr
 import { supabase } from "../supabaseClient.js";
 import { COLORS, BUSINESS } from "../config.js";
 
-const EMPTY_FORM = { category: "bike", name: "", price: "", unit: "/hr", tag: "", hours: "", active: true };
+const EMPTY_FORM = { category: "bike", name: "", price: "", unit: "/hr", tag: "", hours: "", active: true, image_url: "" };
 
 export default function AdminDashboard() {
   const [session, setSession] = useState(undefined); // undefined = checking, null = logged out
@@ -93,7 +93,7 @@ function ListingsTab() {
     setError("");
   }
   function openEdit(l) {
-    setForm({ ...l, price: String(l.price), hours: l.hours == null ? "" : String(l.hours) });
+    setForm({ ...l, price: String(l.price), hours: l.hours == null ? "" : String(l.hours), image_url: l.image_url || "" });
     setError("");
   }
 
@@ -109,6 +109,7 @@ function ListingsTab() {
       tag: form.tag.trim(),
       hours: form.hours === "" ? null : Number(form.hours),
       active: form.active,
+      image_url: form.image_url.trim() || null,
     };
     if (!payload.name || Number.isNaN(payload.price)) {
       setError("Name and a valid price are required.");
@@ -230,6 +231,16 @@ function ListingsTab() {
                 <input type="number" value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} className="w-full px-3 py-2 rounded-md text-sm" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
               </div>
             </div>
+
+            <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>IMAGE URL (optional)</label>
+            <input
+              value={form.image_url}
+              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              placeholder="https://..."
+              className="w-full mb-3 px-3 py-2 rounded-md text-sm"
+              style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            />
+            <p className="text-xs mb-3" style={{ color: COLORS.muted }}>Leave blank to show a styled placeholder instead.</p>
 
             <label className="flex items-center gap-2 mb-4 text-sm">
               <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
