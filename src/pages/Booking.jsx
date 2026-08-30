@@ -14,11 +14,14 @@ import {
   Loader2,
   User,
   Phone,
+  Mail,
   Search,
   X,
 } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
-import { BUSINESS, SLOTS, COLORS } from "../config.js";
+import { BUSINESS, SLOTS } from "../config.js";
+import { useTheme } from "../ThemeContext.jsx";
+import ThemeToggle from "../components/ThemeToggle.jsx";
 
 const CATEGORIES = [
   { key: "bike", label: "Bikes", icon: Bike, tint: "rgba(245,183,0,0.16)" },
@@ -45,6 +48,7 @@ function dayLabel(d) {
 }
 
 export default function Booking() {
+  const { colors: COLORS } = useTheme();
   const [allListings, setAllListings] = useState({ bike: [], car: [], bus: [], tour: [] });
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
@@ -56,6 +60,7 @@ export default function Booking() {
   const [slot, setSlot] = useState(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [ticket, setTicket] = useState(null);
@@ -110,7 +115,7 @@ export default function Booking() {
     setSelected({ category, listingId });
   }
 
-  const canConfirm = listing && slot && name.trim() && phone.trim().length >= 7 && !submitting;
+  const canConfirm = listing && slot && name.trim() && phone.trim().length >= 7 && email.trim().includes("@") && !submitting;
 
   async function confirmBooking() {
     if (!listing || !slot) return;
@@ -124,6 +129,7 @@ export default function Booking() {
       slot_time: slot,
       customer_name: name.trim(),
       customer_phone: phone.trim(),
+      customer_email: email.trim(),
       code,
     });
 
@@ -146,6 +152,7 @@ export default function Booking() {
       slot,
       name: name.trim(),
       phone: phone.trim(),
+      email: email.trim(),
       price: listing.price,
       unit: listing.unit,
       tag: listing.tag,
@@ -170,6 +177,7 @@ export default function Booking() {
     setSlot(null);
     setName("");
     setPhone("");
+    setEmail("");
   }
 
   const term = search.trim().toLowerCase();
@@ -205,6 +213,7 @@ export default function Booking() {
           <MapPin size={13} />
           {BUSINESS.location}
         </div>
+        <ThemeToggle />
       </header>
 
       {/* Hero */}
@@ -310,7 +319,7 @@ export default function Booking() {
                     })}
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-3 mb-4">
+              <div className="grid sm:grid-cols-2 gap-3 mb-3">
                 <div className="relative">
                   <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2" color={COLORS.muted} />
                   <input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
@@ -319,6 +328,10 @@ export default function Booking() {
                   <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2" color={COLORS.muted} />
                   <input placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
                 </div>
+              </div>
+              <div className="relative mb-4">
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" color={COLORS.muted} />
+                <input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
               </div>
               {error && <p className="text-xs mb-3" style={{ color: COLORS.danger }}>{error}</p>}
 
@@ -461,6 +474,7 @@ function TicketView({ ticket, waLink, onReset, colors, business }) {
           {ticket.type === "tour" && ticket.hours && <Row label="DURATION" value={`${ticket.tag} · ${ticket.hours} hrs`} colors={colors} />}
           <Row label="NAME" value={ticket.name} colors={colors} />
           <Row label="PHONE" value={ticket.phone} colors={colors} />
+          <Row label="EMAIL" value={ticket.email} colors={colors} />
         </div>
         <div className="relative h-0 border-t border-dashed" style={{ borderColor: colors.border }}>
           <div className="absolute -left-3 -top-3 w-6 h-6 rounded-full" style={{ background: colors.bg }} />

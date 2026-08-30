@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Plus, Pencil, Trash2, X, Loader2, ListChecks, CalendarDays } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
-import { COLORS, BUSINESS } from "../config.js";
+import { BUSINESS } from "../config.js";
+import { useTheme } from "../ThemeContext.jsx";
+import ThemeToggle from "../components/ThemeToggle.jsx";
 
 const EMPTY_FORM = { category: "bike", name: "", price: "", unit: "/hr", tag: "", hours: "", active: true, image_url: "" };
 
 export default function AdminDashboard() {
+  const { colors: COLORS } = useTheme();
   const [session, setSession] = useState(undefined); // undefined = checking, null = logged out
   const [tab, setTab] = useState("listings");
   const navigate = useNavigate();
@@ -42,9 +45,12 @@ export default function AdminDashboard() {
           <p className="font-mono text-xs tracking-widest" style={{ color: COLORS.accent }}>{BUSINESS.name.toUpperCase()}</p>
           <h1 className="font-display text-3xl leading-none">ADMIN</h1>
         </div>
-        <button onClick={logout} className="flex items-center gap-2 px-3 py-2 rounded-md text-sm" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}>
-          <LogOut size={14} /> Log out
-        </button>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <button onClick={logout} className="flex items-center gap-2 px-3 py-2 rounded-md text-sm" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}>
+            <LogOut size={14} /> Log out
+          </button>
+        </div>
       </header>
 
       <div className="px-6 pt-5">
@@ -71,6 +77,7 @@ export default function AdminDashboard() {
 }
 
 function ListingsTab() {
+  const { colors: COLORS } = useTheme();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(null); // null = closed, object = editing/creating
@@ -260,8 +267,10 @@ function ListingsTab() {
 }
 
 function BookingsTab() {
+  const { colors: COLORS } = useTheme();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [notifyState, setNotifyState] = useState({}); // id -> "sending" | "sent" | "failed"
 
   async function load() {
     setLoading(true);
@@ -278,9 +287,28 @@ function BookingsTab() {
     load();
   }, []);
 
-  async function cancel(id) {
-    await supabase.from("bookings").update({ status: "cancelled" }).eq("id", id);
+  async function cancel(booking) {
+    await supabase.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
     load();
+
+    if (!booking.customer_email) return; // nothing to notify
+
+    setNotifyState((s) => ({ ...s, [booking.id]: "sending" }));
+    try {
+      const { error } = await supabase.functions.invoke("notify-cancellation", {
+        body: {
+          name: booking.customer_name,
+          email: booking.customer_email,
+          date: booking.booking_date,
+          slot: booking.slot_time,
+          listingName: booking.listings?.name || "your booking",
+          code: booking.code,
+        },
+      });
+      setNotifyState((s) => ({ ...s, [booking.id]: error ? "failed" : "sent" }));
+    } catch {
+      setNotifyState((s) => ({ ...s, [booking.id]: "failed" }));
+    }
   }
 
   if (loading) return <Loader2 className="animate-spin" style={{ color: COLORS.accent }} size={24} />;
@@ -299,6 +327,7 @@ function BookingsTab() {
               <th className="text-left px-3 py-2">Item</th>
               <th className="text-left px-3 py-2">Customer</th>
               <th className="text-left px-3 py-2">Phone</th>
+              <th className="text-left px-3 py-2">Email</th>
               <th className="text-left px-3 py-2">Code</th>
               <th className="text-left px-3 py-2">Status</th>
               <th className="text-left px-3 py-2"></th>
@@ -311,15 +340,19 @@ function BookingsTab() {
                 <td className="px-3 py-2 font-mono">{b.slot_time}</td>
                 <td className="px-3 py-2">{b.listings?.name || "—"} <span style={{ color: COLORS.muted }}>({b.listings?.category})</span></td>
                 <td className="px-3 py-2">{b.customer_name}</td>
+                <td className="px-3 py-2 font-mono" style={{ fontSize: "11px" }}>{b.customer_email || "—"}</td>
                 <td className="px-3 py-2 font-mono">{b.customer_phone}</td>
                 <td className="px-3 py-2 font-mono" style={{ color: COLORS.accent }}>{b.code}</td>
                 <td className="px-3 py-2 capitalize">{b.status}</td>
                 <td className="px-3 py-2">
                   {b.status === "confirmed" && (
-                    <button onClick={() => cancel(b.id)} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.danger }}>
+                    <button onClick={() => cancel(b)} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.danger }}>
                       Cancel
                     </button>
                   )}
+                  {notifyState[b.id] === "sending" && <span className="text-xs font-mono ml-2" style={{ color: COLORS.muted }}>notifying…</span>}
+                  {notifyState[b.id] === "sent" && <span className="text-xs font-mono ml-2" style={{ color: COLORS.whatsapp }}>notified</span>}
+                  {notifyState[b.id] === "failed" && <span className="text-xs font-mono ml-2" style={{ color: COLORS.danger }}>notify failed</span>}
                 </td>
               </tr>
             ))}

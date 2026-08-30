@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Loader2 } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
-import { COLORS, BUSINESS } from "../config.js";
+import { BUSINESS } from "../config.js";
+import { useTheme } from "../ThemeContext.jsx";
 
 export default function AdminLogin() {
+  const { colors: COLORS } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

@@ -17,6 +17,15 @@ body {
     radial-gradient(ellipse 700px 420px at 100% 105%, rgba(37, 211, 102, 0.07), transparent 60%);
   background-size: 26px 26px, 100% 100%, 100% 100%;
   background-attachment: fixed;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+[data-theme="light"] body {
+  color: #1c2228;
+  background-color: #faf7f2;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(201, 138, 0, 0.1), transparent 60%),
+    radial-gradient(ellipse 700px 420px at 100% 105%, rgba(29, 168, 81, 0.06), transparent 60%);
 }
 
 .font-display {
