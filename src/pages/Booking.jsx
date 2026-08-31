@@ -52,6 +52,14 @@ function dateKey(d) {
 function dayLabel(d) {
   return d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
 }
+function isPastSlot(dateStr, slotTime) {
+  const now = new Date();
+  if (dateStr !== dateKey(now)) return false; // only today's date can have "past" slots
+  const [h, m] = slotTime.split(":").map(Number);
+  const slotDate = new Date();
+  slotDate.setHours(h, m, 0, 0);
+  return slotDate <= now;
+}
 function daysBetweenInclusive(startStr, endStr) {
   const out = [];
   const start = new Date(startStr);
@@ -130,7 +138,7 @@ export default function Booking() {
   }, []);
 
   const listing = selected ? allListings[selected.category]?.find((l) => l.id === selected.listingId) : null;
-  const isMultiDayEligible = listing && listing.unit === "/day";
+  const isMultiDayEligible = listing && listing.category !== "tour";
 
   useEffect(() => {
     if (!selected || multiDay) return;
@@ -508,21 +516,24 @@ export default function Booking() {
                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-5">
                     {loadingSlots
                       ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-10 rounded-lg animate-pulse" style={{ background: COLORS.surface2 }} />)
-                      : SLOTS.map((s) => {
+                                      : SLOTS.map((s) => {
                           const isBooked = takenSlots.includes(s);
+                          const isPast = isPastSlot(date, s);
+                          const isDisabled = isBooked || isPast;
                           const active = slot === s;
                           return (
                             <button
                               key={s}
-                              disabled={isBooked}
+                              disabled={isDisabled}
                               onClick={() => setSlot(s)}
                               className="font-mono text-sm py-2.5 rounded-lg flex items-center justify-center gap-1.5"
                               style={{
-                                background: isBooked ? "transparent" : active ? `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentBright})` : COLORS.surface2,
-                                border: `1px solid ${isBooked ? COLORS.border : active ? "transparent" : COLORS.border}`,
-                                color: isBooked ? COLORS.muted : active ? COLORS.bg : COLORS.text,
-                                opacity: isBooked ? 0.4 : 1,
-                                textDecoration: isBooked ? "line-through" : "none",
+                                background: isDisabled ? "transparent" : active ? `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentBright})` : COLORS.surface2,
+                                border: `1px solid ${isDisabled ? COLORS.border : active ? "transparent" : COLORS.border}`,
+                                color: isDisabled ? COLORS.muted : active ? COLORS.bg : COLORS.text,
+                                opacity: isDisabled ? 0.4 : 1,
+                                textDecoration: isDisabled ? "line-through" : "none",
+                                cursor: isDisabled ? "not-allowed" : "pointer",
                               }}
                             >
                               <Clock size={12} />
