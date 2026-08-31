@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Plus, Pencil, Trash2, X, Loader2, ListChecks, CalendarDays } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, X, Loader2, ListChecks, CalendarDays, Tag, Star, BarChart3, Check as CheckIcon } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
 import { BUSINESS } from "../config.js";
 import { useTheme } from "../ThemeContext.jsx";
@@ -58,6 +58,9 @@ export default function AdminDashboard() {
           {[
             { id: "listings", label: "Listings", icon: ListChecks },
             { id: "bookings", label: "Bookings", icon: CalendarDays },
+            { id: "coupons", label: "Coupons", icon: Tag },
+            { id: "reviews", label: "Reviews", icon: Star },
+            { id: "analytics", label: "Analytics", icon: BarChart3 },
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -71,7 +74,13 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="px-6 pb-16">{tab === "listings" ? <ListingsTab /> : <BookingsTab />}</div>
+      <div className="px-6 pb-16">
+        {tab === "listings" && <ListingsTab />}
+        {tab === "bookings" && <BookingsTab />}
+        {tab === "coupons" && <CouponsTab />}
+        {tab === "reviews" && <ReviewsTab />}
+        {tab === "analytics" && <AnalyticsTab />}
+      </div>
     </div>
   );
 }
@@ -358,6 +367,277 @@ function BookingsTab() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+function CouponsTab() {
+  const { colors: COLORS } = useTheme();
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    setCoupons(data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function save(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    const payload = {
+      code: form.code.trim().toUpperCase(),
+      discount_percent: Number(form.discount_percent),
+      active: form.active,
+      expires_at: form.expires_at || null,
+    };
+    if (!payload.code || !payload.discount_percent) {
+      setError("Code and discount percent are required.");
+      setSaving(false);
+      return;
+    }
+    const { error: err } = await supabase.from("coupons").insert(payload);
+    setSaving(false);
+    if (err) {
+      setError(err.message.includes("duplicate") ? "That code already exists." : "Couldn't save — try again.");
+      return;
+    }
+    setForm(null);
+    load();
+  }
+
+  async function toggleActive(c) {
+    await supabase.from("coupons").update({ active: !c.active }).eq("id", c.id);
+    load();
+  }
+
+  async function remove(id) {
+    if (!window.confirm("Delete this coupon?")) return;
+    await supabase.from("coupons").delete().eq("id", id);
+    load();
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex justify-between items-center mb-4">
+        <p className="font-mono text-xs tracking-widest" style={{ color: COLORS.muted }}>{coupons.length} COUPON{coupons.length === 1 ? "" : "S"}</p>
+        <button onClick={() => setForm({ code: "", discount_percent: "10", active: true, expires_at: "" })} className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold" style={{ background: COLORS.accent, color: COLORS.bg }}>
+          <Plus size={16} /> Add coupon
+        </button>
+      </div>
+
+      {loading ? (
+        <Loader2 className="animate-spin" style={{ color: COLORS.accent }} size={24} />
+      ) : (
+        <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${COLORS.border}` }}>
+          {coupons.map((c) => (
+            <div key={c.id} className="flex items-center justify-between px-4 py-3 border-b last:border-b-0" style={{ borderColor: COLORS.border, background: COLORS.surface, opacity: c.active ? 1 : 0.5 }}>
+              <div>
+                <p className="text-sm font-semibold font-mono">{c.code}</p>
+                <p className="font-mono text-xs" style={{ color: COLORS.muted }}>
+                  {c.discount_percent}% off {c.expires_at ? `· expires ${c.expires_at.slice(0, 10)}` : ""} {!c.active && "· inactive"}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => toggleActive(c)} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.muted }}>
+                  {c.active ? "Disable" : "Enable"}
+                </button>
+                <button onClick={() => remove(c.id)} className="p-2 rounded" style={{ background: COLORS.surface2 }}>
+                  <Trash2 size={14} color={COLORS.danger} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {form && (
+        <div className="fixed inset-0 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.6)" }}>
+          <form onSubmit={save} className="w-full max-w-sm p-5 rounded-lg" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-2xl">NEW COUPON</h2>
+              <button type="button" onClick={() => setForm(null)}><X size={18} color={COLORS.muted} /></button>
+            </div>
+            <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>CODE</label>
+            <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} className="w-full mb-3 px-3 py-2 rounded-md text-sm uppercase" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
+            <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>DISCOUNT %</label>
+            <input type="number" value={form.discount_percent} onChange={(e) => setForm({ ...form, discount_percent: e.target.value })} className="w-full mb-3 px-3 py-2 rounded-md text-sm" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
+            <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>EXPIRES (optional)</label>
+            <input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} className="w-full mb-4 px-3 py-2 rounded-md text-sm" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }} />
+            {error && <p className="text-xs mb-3" style={{ color: COLORS.danger }}>{error}</p>}
+            <button type="submit" disabled={saving} className="w-full py-2.5 rounded-md font-semibold flex items-center justify-center gap-2" style={{ background: COLORS.accent, color: COLORS.bg }}>
+              {saving ? <Loader2 className="animate-spin" size={16} /> : "Save"}
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ReviewsTab() {
+  const { colors: COLORS } = useTheme();
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("pending");
+
+  async function load() {
+    setLoading(true);
+    let query = supabase.from("reviews").select("*, listings(name)").order("created_at", { ascending: false });
+    if (filter === "pending") query = query.eq("approved", false);
+    if (filter === "approved") query = query.eq("approved", true);
+    const { data } = await query;
+    setReviews(data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, [filter]);
+
+  async function approve(id) {
+    await supabase.from("reviews").update({ approved: true }).eq("id", id);
+    load();
+  }
+  async function remove(id) {
+    if (!window.confirm("Delete this review?")) return;
+    await supabase.from("reviews").delete().eq("id", id);
+    load();
+  }
+
+  return (
+    <div className="max-w-3xl">
+      <div className="flex items-center gap-2 mb-4">
+        {["pending", "approved", "all"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className="text-xs font-mono px-3 py-1.5 rounded-full capitalize"
+            style={{ background: filter === f ? COLORS.accent : COLORS.surface2, color: filter === f ? COLORS.bg : COLORS.muted }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <Loader2 className="animate-spin" style={{ color: COLORS.accent }} size={24} />
+      ) : reviews.length === 0 ? (
+        <p className="text-sm" style={{ color: COLORS.muted }}>No reviews here.</p>
+      ) : (
+        <div className="space-y-3">
+          {reviews.map((r) => (
+            <div key={r.id} className="rounded-lg p-4" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm">{r.customer_name}</span>
+                  <span className="font-mono text-xs" style={{ color: COLORS.muted }}>{r.listings?.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={12} fill={i < r.rating ? COLORS.accent : "none"} color={COLORS.accent} />
+                  ))}
+                </div>
+              </div>
+              {r.comment && <p className="text-sm mb-3" style={{ color: COLORS.muted }}>{r.comment}</p>}
+              <div className="flex items-center gap-2">
+                {!r.approved && (
+                  <button onClick={() => approve(r.id)} className="text-xs font-mono px-2 py-1 rounded flex items-center gap-1" style={{ background: COLORS.surface2, color: COLORS.whatsapp }}>
+                    <CheckIcon size={12} /> Approve
+                  </button>
+                )}
+                <button onClick={() => remove(r.id)} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.danger }}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnalyticsTab() {
+  const { colors: COLORS } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [byCategory, setByCategory] = useState([]);
+  const [topListings, setTopListings] = useState([]);
+  const [totalBookings, setTotalBookings] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const { data } = await supabase.from("bookings").select("listing_id, status, listings(name, category)").eq("status", "confirmed");
+      const rows = data || [];
+      setTotalBookings(rows.length);
+
+      const catCounts = {};
+      const listingCounts = {};
+      rows.forEach((r) => {
+        const cat = r.listings?.category || "unknown";
+        catCounts[cat] = (catCounts[cat] || 0) + 1;
+        const name = r.listings?.name || "unknown";
+        listingCounts[name] = (listingCounts[name] || 0) + 1;
+      });
+      const catArr = Object.entries(catCounts).map(([k, v]) => ({ label: k, count: v })).sort((a, b) => b.count - a.count);
+      const topArr = Object.entries(listingCounts).map(([k, v]) => ({ label: k, count: v })).sort((a, b) => b.count - a.count).slice(0, 5);
+      setByCategory(catArr);
+      setTopListings(topArr);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return <Loader2 className="animate-spin" style={{ color: COLORS.accent }} size={24} />;
+
+  const maxCat = Math.max(1, ...byCategory.map((c) => c.count));
+  const maxTop = Math.max(1, ...topListings.map((c) => c.count));
+
+  return (
+    <div className="max-w-2xl space-y-8">
+      <div>
+        <p className="font-mono text-xs tracking-widest mb-1" style={{ color: COLORS.muted }}>TOTAL CONFIRMED BOOKINGS</p>
+        <p className="font-display text-5xl">{totalBookings}</p>
+      </div>
+
+      <div>
+        <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.muted }}>BY CATEGORY</p>
+        <div className="space-y-2">
+          {byCategory.map((c) => (
+            <div key={c.label} className="flex items-center gap-3">
+              <span className="w-14 text-xs font-mono capitalize" style={{ color: COLORS.text }}>{c.label}</span>
+              <div className="flex-1 h-6 rounded-md overflow-hidden" style={{ background: COLORS.surface2 }}>
+                <div className="h-full rounded-md" style={{ width: `${(c.count / maxCat) * 100}%`, background: `linear-gradient(90deg, ${COLORS.accent}, ${COLORS.accentBright})` }} />
+              </div>
+              <span className="w-8 text-xs font-mono text-right" style={{ color: COLORS.muted }}>{c.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.muted }}>TOP 5 LISTINGS</p>
+        <div className="space-y-2">
+          {topListings.map((c) => (
+            <div key={c.label} className="flex items-center gap-3">
+              <span className="w-32 text-xs truncate" style={{ color: COLORS.text }}>{c.label}</span>
+              <div className="flex-1 h-6 rounded-md overflow-hidden" style={{ background: COLORS.surface2 }}>
+                <div className="h-full rounded-md" style={{ width: `${(c.count / maxTop) * 100}%`, background: `linear-gradient(90deg, ${COLORS.accent}, ${COLORS.accentBright})` }} />
+              </div>
+              <span className="w-8 text-xs font-mono text-right" style={{ color: COLORS.muted }}>{c.count}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
