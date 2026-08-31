@@ -87,11 +87,7 @@ export function LanguageProvider({ children }) {
     }
   }
 
-  return (
-    <LanguageContext.Provider value={{ lang, setLang: changeLang }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return React.createElement(LanguageContext.Provider, { value: { lang, setLang: changeLang } }, children);
 }
 
 export function useLanguage() {
