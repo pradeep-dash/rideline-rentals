@@ -377,6 +377,7 @@ export default function Booking() {
                         key={l.id}
                         listing={l}
                         category={cat}
+                        colors={COLORS}
                         selected={selected && selected.listingId === l.id}
                         onBook={() => chooseListing(cat.key, l.id)}
                       />
@@ -409,44 +410,44 @@ export default function Booking() {
   );
 }
 
-function PhotoCard({ listing, category, selected, onBook }) {
+function PhotoCard({ listing, category, colors, selected, onBook }) {
   const Icon = category.icon;
   return (
     <div
       className="shrink-0 w-52 sm:w-56 rounded-2xl overflow-hidden flex flex-col"
-      style={{ background: COLORS.surface, border: `1px solid ${selected ? COLORS.accent : COLORS.border}`, boxShadow: selected ? `0 8px 24px ${COLORS.glow}` : "0 2px 8px rgba(0,0,0,0.15)" }}
+      style={{ background: colors.surface, border: `1px solid ${selected ? colors.accent : colors.border}`, boxShadow: selected ? `0 8px 24px ${colors.glow}` : "0 2px 8px rgba(0,0,0,0.15)" }}
     >
-      <div className="h-32 relative flex items-center justify-center overflow-hidden" style={{ background: listing.image_url ? "none" : `linear-gradient(135deg, ${category.tint}, ${COLORS.surface2})` }}>
+      <div className="h-32 relative flex items-center justify-center overflow-hidden" style={{ background: listing.image_url ? "none" : `linear-gradient(135deg, ${category.tint}, ${colors.surface2})` }}>
         {listing.image_url ? (
           <img src={listing.image_url} alt={listing.name} className="w-full h-full object-cover" />
         ) : (
           <>
             <div className="absolute inset-0" style={{ opacity: 0.14 }}>
-              <Icon size={26} color={COLORS.text} style={{ position: "absolute", top: 8, left: 10, transform: "rotate(-12deg)" }} />
-              <Icon size={22} color={COLORS.text} style={{ position: "absolute", bottom: 10, left: 46, transform: "rotate(8deg)" }} />
-              <Icon size={30} color={COLORS.text} style={{ position: "absolute", top: 18, right: 14, transform: "rotate(15deg)" }} />
-              <Icon size={20} color={COLORS.text} style={{ position: "absolute", bottom: 14, right: 50, transform: "rotate(-10deg)" }} />
+              <Icon size={26} color={colors.text} style={{ position: "absolute", top: 8, left: 10, transform: "rotate(-12deg)" }} />
+              <Icon size={22} color={colors.text} style={{ position: "absolute", bottom: 10, left: 46, transform: "rotate(8deg)" }} />
+              <Icon size={30} color={colors.text} style={{ position: "absolute", top: 18, right: 14, transform: "rotate(15deg)" }} />
+              <Icon size={20} color={colors.text} style={{ position: "absolute", bottom: 14, right: 50, transform: "rotate(-10deg)" }} />
             </div>
-            <Icon size={38} color={COLORS.accent} style={{ position: "relative", filter: `drop-shadow(0 2px 8px ${COLORS.glow})` }} />
+            <Icon size={38} color={colors.accent} style={{ position: "relative", filter: `drop-shadow(0 2px 8px ${colors.glow})` }} />
           </>
         )}
-        <span className="absolute top-2 right-2 font-mono text-[10px] px-2 py-1 rounded-full" style={{ background: "rgba(20,24,28,0.75)", color: COLORS.text, backdropFilter: "blur(4px)" }}>
+        <span className="absolute top-2 right-2 font-mono text-[10px] px-2 py-1 rounded-full" style={{ background: "rgba(20,24,28,0.75)", color: "#F2F0EA", backdropFilter: "blur(4px)" }}>
           {listing.tag}{listing.hours ? ` · ${listing.hours}h` : ""}
         </span>
       </div>
       <div className="p-3.5 flex flex-col flex-1">
-        <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2">{listing.name}</p>
+        <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2" style={{ color: colors.text }}>{listing.name}</p>
         <p className="font-mono text-sm mb-3">
-          <span style={{ color: COLORS.accent }}>₹{listing.price}</span>
-          <span style={{ color: COLORS.muted }}>{listing.unit}</span>
+          <span style={{ color: colors.accent }}>₹{listing.price}</span>
+          <span style={{ color: colors.muted }}>{listing.unit}</span>
         </p>
         <button
           onClick={onBook}
           className="mt-auto w-full py-2 rounded-lg text-sm font-semibold"
           style={{
-            background: selected ? `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentBright})` : COLORS.surface2,
-            color: selected ? COLORS.bg : COLORS.text,
-            border: selected ? "none" : `1px solid ${COLORS.border}`,
+            background: selected ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentBright})` : colors.surface2,
+            color: selected ? colors.bg : colors.text,
+            border: selected ? "none" : `1px solid ${colors.border}`,
           }}
         >
           {selected ? "Selected" : "Book"}
