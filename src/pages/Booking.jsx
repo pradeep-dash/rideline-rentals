@@ -21,6 +21,8 @@ import {
   Tag,
   CalendarRange,
   ClipboardList,
+  Compass,
+  Users,
 } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
 import { BUSINESS, SLOTS } from "../config.js";
@@ -29,11 +31,12 @@ import ThemeToggle from "../components/ThemeToggle.jsx";
 import LanguageToggle from "../components/LanguageToggle.jsx";
 import { useLanguage, t } from "../i18n.js";
 
+// Tours lead — vehicle rental is a supporting service, not the headline.
 const CATEGORIES = [
+  { key: "tour", labelKey: "tours", icon: Landmark, tint: "rgba(245,110,110,0.14)" },
   { key: "bike", labelKey: "bikes", icon: Bike, tint: "rgba(245,183,0,0.16)" },
   { key: "car", labelKey: "cars", icon: Car, tint: "rgba(37,211,102,0.14)" },
   { key: "bus", labelKey: "buses", icon: Bus, tint: "rgba(122,110,245,0.16)" },
-  { key: "tour", labelKey: "tours", icon: Landmark, tint: "rgba(245,110,110,0.14)" },
 ];
 
 function nextDays(n) {
@@ -409,19 +412,53 @@ export default function Booking() {
         <p className="mt-3 text-base" style={{ color: COLORS.muted }}>
           {tr("heroSubtitle")}
         </p>
-        <nav aria-label="Categories" className="flex justify-center gap-2 flex-wrap mt-6">
-          {CATEGORIES.map((c) => (
-            <a
-              key={c.key}
-              href={`#${c.key}`}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
-              style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-            >
-              <c.icon size={14} color={COLORS.accent} />
-              {tr(c.labelKey)}
-            </a>
-          ))}
-        </nav>
+      </section>
+
+      {/* Services overview */}
+      <section className="px-5 pb-10 max-w-5xl mx-auto">
+        <p className="font-mono text-xs tracking-widest mb-4 text-center" style={{ color: COLORS.muted }}>{tr("ourServices")}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <a
+            href="#tour"
+            className="flex flex-col gap-2 p-4 rounded-2xl"
+            style={{ background: `linear-gradient(160deg, ${COLORS.accentSoft}, ${COLORS.surface})`, border: `1px solid ${COLORS.accent}` }}
+          >
+            <Landmark size={22} color={COLORS.accent} />
+            <p className="font-semibold text-sm leading-tight">{tr("serviceToursTitle")}</p>
+            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceToursDesc")}</p>
+          </a>
+          <a
+            href="#bike"
+            className="flex flex-col gap-2 p-4 rounded-2xl"
+            style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+          >
+            <Car size={22} color={COLORS.accent} />
+            <p className="font-semibold text-sm leading-tight">{tr("serviceRentalTitle")}</p>
+            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceRentalDesc")}</p>
+          </a>
+          <a
+            href={`https://wa.me/${BUSINESS.whatsapp}?text=Hi! I'd like help planning a custom trip.`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-col gap-2 p-4 rounded-2xl"
+            style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+          >
+            <Compass size={22} color={COLORS.accent} />
+            <p className="font-semibold text-sm leading-tight">{tr("serviceCustomTitle")}</p>
+            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceCustomDesc")}</p>
+          </a>
+          <a
+            href={`https://wa.me/${BUSINESS.whatsapp}?text=Hi! I'd like to enquire about group/corporate travel.`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-col gap-2 p-4 rounded-2xl"
+            style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+          >
+            <Users size={22} color={COLORS.accent} />
+            <p className="font-semibold text-sm leading-tight">{tr("serviceGroupTitle")}</p>
+            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceGroupDesc")}</p>
+          </a>
+        </div>
       </section>
 
       {/* Booking panel */}
@@ -688,32 +725,41 @@ export default function Booking() {
             {CATEGORIES.map((cat) => {
               const items = sortListings(allListings[cat.key].filter(matches));
               if (term && items.length === 0) return null;
+              const isFirstVehicleSection = cat.key === "bike";
               return (
-                <section key={cat.key} id={cat.key} className="pt-8 px-5" style={{ scrollMarginTop: "72px" }}>
-                  <div className="flex items-center gap-2 mb-4 max-w-5xl mx-auto">
-                    <cat.icon size={20} color={COLORS.accent} />
-                    <h2 className="font-display text-2xl">{tr(cat.labelKey)}</h2>
-                  </div>
-                  {items.length === 0 ? (
-                    <p className="text-sm max-w-5xl mx-auto" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
-                  ) : (
-                    <div className="flex gap-4 overflow-x-auto pb-3 max-w-5xl mx-auto sm:flex-wrap sm:overflow-visible">
-                      {items.map((l) => (
-                        <PhotoCard
-                          key={l.id}
-                          listing={l}
-                          category={cat}
-                          colors={COLORS}
-                          stats={reviewStats[l.id]}
-                          bookLabel={tr("book")}
-                          selectedLabel={tr("selected")}
-                          selected={selected && selected.listingId === l.id}
-                          onBook={() => chooseListing(cat.key, l.id)}
-                        />
-                      ))}
+                <React.Fragment key={cat.key}>
+                  {isFirstVehicleSection && (
+                    <div className="pt-10 px-5 max-w-5xl mx-auto text-center" style={{ borderTop: `1px solid ${COLORS.border}`, marginTop: "1rem" }}>
+                      <p className="font-mono text-xs tracking-widest mb-1" style={{ color: COLORS.accent }}>{tr("vehicleRentalHeading")}</p>
+                      <p className="text-sm" style={{ color: COLORS.muted }}>{tr("vehicleRentalSubtitle")}</p>
                     </div>
                   )}
-                </section>
+                  <section id={cat.key} className="pt-8 px-5" style={{ scrollMarginTop: "72px" }}>
+                    <div className="flex items-center gap-2 mb-4 max-w-5xl mx-auto">
+                      <cat.icon size={20} color={COLORS.accent} />
+                      <h2 className="font-display text-2xl">{tr(cat.labelKey)}</h2>
+                    </div>
+                    {items.length === 0 ? (
+                      <p className="text-sm max-w-5xl mx-auto" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
+                    ) : (
+                      <div className="flex gap-4 overflow-x-auto pb-3 max-w-5xl mx-auto sm:flex-wrap sm:overflow-visible">
+                        {items.map((l) => (
+                          <PhotoCard
+                            key={l.id}
+                            listing={l}
+                            category={cat}
+                            colors={COLORS}
+                            stats={reviewStats[l.id]}
+                            bookLabel={tr("book")}
+                            selectedLabel={tr("selected")}
+                            selected={selected && selected.listingId === l.id}
+                            onBook={() => chooseListing(cat.key, l.id)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                </React.Fragment>
               );
             })}
           </>

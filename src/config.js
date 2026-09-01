@@ -1,6 +1,6 @@
 // Edit these to your real business details.
 export const BUSINESS = {
-  name: "RideLine Rentals",
+  name: "RideLine Tours & Travels",
   whatsapp: "911234567890", // country code + number, no + or spaces
   instagram: "ridelinerentals",
   facebook: "ridelinerentals",
