@@ -39,6 +39,11 @@ const STRINGS = {
   exploreTours: { en: "Explore tours", hi: "टूर देखें", or: "ଟୁର୍ ଦେଖନ୍ତୁ" },
   viewVehicles: { en: "View vehicles", hi: "वाहन देखें", or: "ଗାଡ଼ି ଦେଖନ୍ତୁ" },
 
+  toursSectionSubtitle: {
+    en: "Our main offering — guided day trips across Odisha",
+    hi: "हमारी मुख्य सेवा — ओडिशा भर में गाइडेड डे ट्रिप",
+    or: "ଆମର ମୁଖ୍ୟ ସେବା — ଓଡ଼ିଶା ସାରା ଗାଇଡେଡ୍ ଡେ ଟ୍ରିପ୍",
+  },
   vehicleRentalHeading: { en: "ALSO AVAILABLE — VEHICLE RENTAL", hi: "यह भी उपलब्ध — वाहन किराया", or: "ଏହା ମଧ୍ୟ ଉପଲବ୍ଧ — ଗାଡ଼ି ଭଡ଼ା" },
   vehicleRentalSubtitle: {
     en: "Need your own wheels for the trip? Rent a bike, car, or bus directly below.",

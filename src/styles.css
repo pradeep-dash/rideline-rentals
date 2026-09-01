@@ -66,6 +66,13 @@ button {
   animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 ::-webkit-scrollbar {
   height: 6px;
   width: 6px;

@@ -36,12 +36,13 @@ import LanguageToggle from "../components/LanguageToggle.jsx";
 import { useLanguage, t } from "../i18n.js";
 
 // Tours lead — vehicle rental is a supporting service, not the headline.
-const CATEGORIES = [
-  { key: "tour", labelKey: "tours", icon: Landmark, tint: "rgba(245,110,110,0.14)" },
+const TOUR_CATEGORY = { key: "tour", labelKey: "tours", icon: Landmark, tint: "rgba(245,110,110,0.14)" };
+const VEHICLE_CATEGORIES = [
   { key: "bike", labelKey: "bikes", icon: Bike, tint: "rgba(245,183,0,0.16)" },
   { key: "car", labelKey: "cars", icon: Car, tint: "rgba(37,211,102,0.14)" },
   { key: "bus", labelKey: "buses", icon: Bus, tint: "rgba(122,110,245,0.16)" },
 ];
+
 
 function nextDays(n) {
   const out = [];
@@ -145,6 +146,17 @@ export default function Booking() {
   const [reviewDone, setReviewDone] = useState(false);
 
   const panelRef = useRef(null);
+
+  // Tour carousel — tracks which large hero card is in view for the dot indicator
+  const tourScrollRef = useRef(null);
+  const [activeTourIndex, setActiveTourIndex] = useState(0);
+  function handleTourScroll() {
+    const el = tourScrollRef.current;
+    if (!el || !el.firstElementChild) return;
+    const cardWidth = el.firstElementChild.offsetWidth + 16; // gap-4 = 16px
+    const idx = Math.round(el.scrollLeft / cardWidth);
+    setActiveTourIndex(idx);
+  }
 
   useEffect(() => {
     (async () => {
@@ -466,7 +478,7 @@ export default function Booking() {
       </header>
 
       {/* Hero */}
-      <section className="relative px-5 pt-10 pb-8 text-center">
+      <section className="relative px-5 pt-7 pb-5 text-center">
         <div
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-4 font-mono text-[10px] tracking-[0.2em]"
           style={{ background: COLORS.accentSoft, color: COLORS.accent, border: `1px solid rgba(245,183,0,0.25)` }}
@@ -482,49 +494,45 @@ export default function Booking() {
         </p>
       </section>
 
-      {/* Services overview */}
-      <section className="px-5 pb-10 max-w-5xl mx-auto">
-        <p className="font-mono text-xs tracking-widest mb-4 text-center" style={{ color: COLORS.muted }}>{tr("ourServices")}</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Services overview — compact 2x2 summary strip, not a second hero */}
+      <section className="px-5 pb-7 max-w-5xl mx-auto">
+        <p className="font-mono text-xs tracking-widest mb-3 text-center" style={{ color: COLORS.muted }}>{tr("ourServices")}</p>
+        <div className="grid grid-cols-2 gap-2">
           <a
             href="#tour"
-            className="flex flex-col gap-2 p-4 rounded-2xl"
+            className="flex items-center gap-2.5 p-2.5 rounded-xl"
             style={{ background: `linear-gradient(160deg, ${COLORS.accentSoft}, ${COLORS.surface})`, border: `1px solid ${COLORS.accent}` }}
           >
-            <Landmark size={22} color={COLORS.accent} />
-            <p className="font-semibold text-sm leading-tight">{tr("serviceToursTitle")}</p>
-            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceToursDesc")}</p>
+            <Landmark size={18} color={COLORS.accent} className="shrink-0" />
+            <p className="font-semibold text-xs leading-tight">{tr("serviceToursTitle")}</p>
           </a>
           <a
             href="#bike"
-            className="flex flex-col gap-2 p-4 rounded-2xl"
+            className="flex items-center gap-2.5 p-2.5 rounded-xl"
             style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
-            <Car size={22} color={COLORS.accent} />
-            <p className="font-semibold text-sm leading-tight">{tr("serviceRentalTitle")}</p>
-            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceRentalDesc")}</p>
+            <Car size={18} color={COLORS.accent} className="shrink-0" />
+            <p className="font-semibold text-xs leading-tight">{tr("serviceRentalTitle")}</p>
           </a>
           <a
             href={`https://wa.me/${BUSINESS.whatsapp}?text=Hi! I'd like help planning a custom trip.`}
             target="_blank"
             rel="noreferrer"
-            className="flex flex-col gap-2 p-4 rounded-2xl"
+            className="flex items-center gap-2.5 p-2.5 rounded-xl"
             style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
-            <Compass size={22} color={COLORS.accent} />
-            <p className="font-semibold text-sm leading-tight">{tr("serviceCustomTitle")}</p>
-            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceCustomDesc")}</p>
+            <Compass size={18} color={COLORS.accent} className="shrink-0" />
+            <p className="font-semibold text-xs leading-tight">{tr("serviceCustomTitle")}</p>
           </a>
           <a
             href={`https://wa.me/${BUSINESS.whatsapp}?text=Hi! I'd like to enquire about group/corporate travel.`}
             target="_blank"
             rel="noreferrer"
-            className="flex flex-col gap-2 p-4 rounded-2xl"
+            className="flex items-center gap-2.5 p-2.5 rounded-xl"
             style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
-            <Users size={22} color={COLORS.accent} />
-            <p className="font-semibold text-sm leading-tight">{tr("serviceGroupTitle")}</p>
-            <p className="text-xs" style={{ color: COLORS.muted }}>{tr("serviceGroupDesc")}</p>
+            <Users size={18} color={COLORS.accent} className="shrink-0" />
+            <p className="font-semibold text-xs leading-tight">{tr("serviceGroupTitle")}</p>
           </a>
         </div>
       </section>
@@ -793,29 +801,31 @@ export default function Booking() {
               </select>
             </div>
 
-            {CATEGORIES.map((cat) => {
+            {/* Tours — primary offering, hero-card treatment */}
+            {(() => {
+              const cat = TOUR_CATEGORY;
               const items = sortListings(allListings[cat.key].filter(matches));
               if (term && items.length === 0) return null;
-              const isFirstVehicleSection = cat.key === "bike";
               return (
-                <React.Fragment key={cat.key}>
-                  {isFirstVehicleSection && (
-                    <div className="pt-10 px-5 max-w-5xl mx-auto text-center" style={{ borderTop: `1px solid ${COLORS.border}`, marginTop: "1rem" }}>
-                      <p className="font-mono text-xs tracking-widest mb-1" style={{ color: COLORS.accent }}>{tr("vehicleRentalHeading")}</p>
-                      <p className="text-sm" style={{ color: COLORS.muted }}>{tr("vehicleRentalSubtitle")}</p>
-                    </div>
-                  )}
-                  <section id={cat.key} className="pt-8 px-5" style={{ scrollMarginTop: "72px" }}>
-                    <div className="flex items-center gap-2 mb-4 max-w-5xl mx-auto">
+                <section id={cat.key} className="pt-6 px-5" style={{ scrollMarginTop: "72px" }}>
+                  <div className="max-w-5xl mx-auto mb-1">
+                    <div className="flex items-center gap-2">
                       <cat.icon size={20} color={COLORS.accent} />
                       <h2 className="font-display text-2xl">{tr(cat.labelKey)}</h2>
                     </div>
-                    {items.length === 0 ? (
-                      <p className="text-sm max-w-5xl mx-auto" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
-                    ) : (
-                      <div className="flex gap-4 overflow-x-auto pb-3 max-w-5xl mx-auto sm:flex-wrap sm:overflow-visible">
+                    <p className="text-xs mt-0.5" style={{ color: COLORS.muted }}>{tr("toursSectionSubtitle")}</p>
+                  </div>
+                  {items.length === 0 ? (
+                    <p className="text-sm max-w-5xl mx-auto mt-3" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
+                  ) : (
+                    <>
+                      <div
+                        ref={tourScrollRef}
+                        onScroll={handleTourScroll}
+                        className="flex gap-4 overflow-x-auto pb-1 pt-4 max-w-5xl mx-auto snap-x snap-mandatory sm:snap-none no-scrollbar"
+                      >
                         {items.map((l) => (
-                          <PhotoCard
+                          <TourCard
                             key={l.id}
                             listing={l}
                             category={cat}
@@ -834,11 +844,77 @@ export default function Booking() {
                           />
                         ))}
                       </div>
-                    )}
-                  </section>
-                </React.Fragment>
+                      {items.length > 1 && (
+                        <div className="flex gap-1.5 justify-center mt-3 sm:hidden" aria-hidden="true">
+                          {items.map((_, i) => (
+                            <span
+                              key={i}
+                              className="h-1.5 rounded-full transition-all"
+                              style={{
+                                width: i === activeTourIndex ? 16 : 6,
+                                background: i === activeTourIndex ? COLORS.accent : COLORS.border,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </section>
               );
-            })}
+            })()}
+
+            {/* Vehicle rental — supporting service, contained in its own panel */}
+            <div className="pt-8 px-5">
+              <div
+                className="max-w-5xl mx-auto rounded-2xl p-4 sm:p-5"
+                style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+              >
+                <div className="text-center mb-5">
+                  <p className="font-mono text-xs tracking-widest mb-1" style={{ color: COLORS.accent }}>{tr("vehicleRentalHeading")}</p>
+                  <p className="text-sm" style={{ color: COLORS.muted }}>{tr("vehicleRentalSubtitle")}</p>
+                </div>
+
+                {VEHICLE_CATEGORIES.map((cat, i) => {
+                  const items = sortListings(allListings[cat.key].filter(matches));
+                  if (term && items.length === 0) return null;
+                  return (
+                    <section id={cat.key} key={cat.key} className={i > 0 ? "mt-6 pt-6" : ""} style={{ scrollMarginTop: "72px", borderTop: i > 0 ? `1px solid ${COLORS.border}` : "none" }}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <cat.icon size={17} color={COLORS.accent} />
+                        <h3 className="font-display text-lg">{tr(cat.labelKey)}</h3>
+                      </div>
+                      {items.length === 0 ? (
+                        <p className="text-sm" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          {items.map((l) => (
+                            <PhotoCard
+                              key={l.id}
+                              listing={l}
+                              category={cat}
+                              colors={COLORS}
+                              stats={reviewStats[l.id]}
+                              bookingCount={bookingCounts[l.id] || 0}
+                              popularLabel={tr("popular")}
+                              bookLabel={tr("book")}
+                              selectedLabel={tr("selected")}
+                              addToTripLabel={tr("addToTrip")}
+                              addedToTripLabel={tr("addedToTrip")}
+                              inTrip={isInTrip(l.id)}
+                              onToggleTrip={() => toggleTrip(l, cat.key)}
+                              selected={selected && selected.listingId === l.id}
+                              onBook={() => chooseListing(cat.key, l.id)}
+                              layout="grid"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
+            </div>
           </>
         )}
       </main>
@@ -847,14 +923,14 @@ export default function Booking() {
       <footer className="px-6 py-10 flex flex-col items-center gap-5" style={{ borderTop: `1px solid ${COLORS.border}` }}>
         <p className="font-mono text-xs tracking-widest" style={{ color: COLORS.muted }}>{tr("questionsReachUs")}</p>
         <div className="flex gap-3 flex-wrap justify-center">
-          <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.whatsapp, color: "#0B1A0F", boxShadow: "0 6px 18px rgba(37,211,102,0.3)" }}>
-            <MessageCircle size={16} /> WhatsApp
+          <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
+            <MessageCircle size={16} color={COLORS.whatsapp} /> WhatsApp
           </a>
           <a href={`https://instagram.com/${BUSINESS.instagram}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-            <Instagram size={16} /> Instagram
+            <Instagram size={16} color={COLORS.accent} /> Instagram
           </a>
           <a href={`https://facebook.com/${BUSINESS.facebook}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-            <Facebook size={16} /> Facebook
+            <Facebook size={16} color={COLORS.accent} /> Facebook
           </a>
         </div>
         <a href="/lookup" className="flex items-center gap-1.5 text-xs font-mono" style={{ color: COLORS.muted }}>
@@ -947,15 +1023,16 @@ export default function Booking() {
   );
 }
 
-function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook }) {
+function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, layout = "scroll" }) {
   const Icon = category.icon;
   const isPopular = bookingCount >= 3;
+  const isGrid = layout === "grid";
   return (
     <div
-      className="shrink-0 w-52 sm:w-56 rounded-2xl overflow-hidden flex flex-col"
+      className={`${isGrid ? "w-full" : "shrink-0 w-52 sm:w-56"} rounded-2xl overflow-hidden flex flex-col`}
       style={{ background: colors.surface, border: `1px solid ${selected ? colors.accent : colors.border}`, boxShadow: selected ? `0 8px 24px ${colors.glow}` : "0 2px 8px rgba(0,0,0,0.15)" }}
     >
-      <div className="h-32 relative flex items-center justify-center overflow-hidden" style={{ background: `linear-gradient(135deg, ${category.tint}, ${colors.surface2})` }}>
+      <div className="h-28 relative flex items-center justify-center overflow-hidden" style={{ background: `linear-gradient(135deg, ${category.tint}, ${colors.surface2})` }}>
         {listing.image_url ? (
           <img src={listing.image_url} alt={listing.name} loading="lazy" decoding="async" className="w-full h-full object-cover relative z-10" />
         ) : (
@@ -972,6 +1049,7 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
         <button
           onClick={onToggleTrip}
           aria-label={inTrip ? addedToTripLabel : addToTripLabel}
+          title={inTrip ? addedToTripLabel : addToTripLabel}
           className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center"
           style={{ background: inTrip ? colors.accent : "rgba(20,24,28,0.75)", backdropFilter: "blur(4px)" }}
         >
@@ -993,7 +1071,7 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
           )}
         </div>
       </div>
-      <div className="p-3.5 flex flex-col flex-1">
+      <div className={`${isGrid ? "p-3" : "p-3.5"} flex flex-col flex-1`}>
         <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2" style={{ color: colors.text }}>{listing.name}</p>
         <p className="font-mono text-sm mb-3">
           <span style={{ color: colors.accent }}>₹{listing.price}</span>
@@ -1010,6 +1088,84 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
         >
           {selected ? selectedLabel : bookLabel}
         </button>
+      </div>
+    </div>
+  );
+}
+
+function TourCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook }) {
+  const Icon = category.icon;
+  const isPopular = bookingCount >= 3;
+  return (
+    <div
+      className="shrink-0 rounded-2xl overflow-hidden flex flex-col snap-start"
+      style={{
+        width: "86%",
+        maxWidth: 340,
+        background: colors.surface,
+        border: `1px solid ${selected ? colors.accent : colors.border}`,
+        boxShadow: selected ? `0 8px 24px ${colors.glow}` : "0 4px 16px rgba(0,0,0,0.18)",
+      }}
+    >
+      <div className="h-44 relative flex items-center justify-center overflow-hidden" style={{ background: `linear-gradient(135deg, ${category.tint}, ${colors.surface2})` }}>
+        {listing.image_url ? (
+          <img src={listing.image_url} alt={listing.name} loading="lazy" decoding="async" className="w-full h-full object-cover relative z-10" />
+        ) : (
+          <>
+            <div className="absolute inset-0" style={{ opacity: 0.14 }}>
+              <Icon size={30} color={colors.text} style={{ position: "absolute", top: 10, left: 14, transform: "rotate(-12deg)" }} />
+              <Icon size={24} color={colors.text} style={{ position: "absolute", bottom: 14, left: 56, transform: "rotate(8deg)" }} />
+              <Icon size={34} color={colors.text} style={{ position: "absolute", top: 22, right: 18, transform: "rotate(15deg)" }} />
+              <Icon size={22} color={colors.text} style={{ position: "absolute", bottom: 18, right: 60, transform: "rotate(-10deg)" }} />
+            </div>
+            <Icon size={46} color={colors.accent} style={{ position: "relative", filter: `drop-shadow(0 2px 8px ${colors.glow})` }} />
+          </>
+        )}
+        {/* Duration badge, overlaid on the photo */}
+        <span className="absolute top-2.5 left-2.5 font-mono text-[10px] px-2.5 py-1 rounded-full z-10" style={{ background: "rgba(20,24,28,0.75)", color: "#F2F0EA", backdropFilter: "blur(4px)" }}>
+          {listing.tag}{listing.hours ? ` · ${listing.hours}h` : ""}
+        </span>
+        {/* Save-for-trip button, labeled */}
+        <button
+          onClick={onToggleTrip}
+          aria-label={inTrip ? addedToTripLabel : addToTripLabel}
+          title={inTrip ? addedToTripLabel : addToTripLabel}
+          className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center"
+          style={{ background: inTrip ? colors.accent : "rgba(20,24,28,0.75)", backdropFilter: "blur(4px)" }}
+        >
+          {inTrip ? <Check size={15} color={colors.bg} /> : <Plus size={15} color="#F2F0EA" />}
+        </button>
+        {isPopular && (
+          <span className="absolute bottom-2.5 left-2.5 font-mono text-[10px] px-2.5 py-1 rounded-full z-10" style={{ background: colors.accent, color: colors.bg }}>
+            {popularLabel}
+          </span>
+        )}
+      </div>
+      <div className="p-4 flex flex-col flex-1">
+        <p className="font-semibold text-base leading-tight mb-1.5" style={{ color: colors.text }}>{listing.name}</p>
+        {stats && stats.review_count > 0 && (
+          <div className="flex items-center gap-1 text-xs mb-3" style={{ color: colors.muted }}>
+            <Star size={12} fill={colors.accent} color={colors.accent} />
+            {stats.avg_rating} · {stats.review_count} {stats.review_count === 1 ? "review" : "reviews"}
+          </div>
+        )}
+        <div className="mt-auto flex items-center justify-between gap-3">
+          <p className="font-mono text-base">
+            <span style={{ color: colors.accent }}>₹{listing.price}</span>
+            <span className="text-sm" style={{ color: colors.muted }}>{listing.unit}</span>
+          </p>
+          <button
+            onClick={onBook}
+            className="py-2 px-5 rounded-lg text-sm font-semibold shrink-0"
+            style={{
+              background: selected ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentBright})` : colors.surface2,
+              color: selected ? colors.bg : colors.text,
+              border: selected ? "none" : `1px solid ${colors.border}`,
+            }}
+          >
+            {selected ? selectedLabel : bookLabel}
+          </button>
+        </div>
       </div>
     </div>
   );
