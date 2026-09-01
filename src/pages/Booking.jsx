@@ -92,6 +92,12 @@ export default function Booking() {
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState("default");
+  const [expandedCats, setExpandedCats] = useState({}); // { bike: true } once "View all" tapped
+  const [detailListing, setDetailListing] = useState(null); // { listing, category } for the tour popup
+
+  function toggleExpanded(catKey) {
+    setExpandedCats((prev) => ({ ...prev, [catKey]: !prev[catKey] }));
+  }
 
   // Trip Builder — a lightweight "save for a combined enquiry" list,
   // separate from actually booking a specific slot.
@@ -841,6 +847,7 @@ export default function Booking() {
                             onToggleTrip={() => toggleTrip(l, cat.key)}
                             selected={selected && selected.listingId === l.id}
                             onBook={() => chooseListing(cat.key, l.id)}
+                            onCardClick={() => setDetailListing({ listing: l, category: cat })}
                           />
                         ))}
                       </div>
@@ -876,18 +883,27 @@ export default function Booking() {
                 </div>
 
                 {VEHICLE_CATEGORIES.map((cat, i) => {
-                  const items = sortListings(allListings[cat.key].filter(matches));
-                  if (term && items.length === 0) return null;
+                  const allItems = sortListings(allListings[cat.key].filter(matches));
+                  if (term && allItems.length === 0) return null;
+                  const isExpanded = !!expandedCats[cat.key];
+                  const items = isExpanded ? allItems : allItems.slice(0, 3);
                   return (
                     <section id={cat.key} key={cat.key} className={i > 0 ? "mt-6 pt-6" : ""} style={{ scrollMarginTop: "72px", borderTop: i > 0 ? `1px solid ${COLORS.border}` : "none" }}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <cat.icon size={17} color={COLORS.accent} />
-                        <h3 className="font-display text-lg">{tr(cat.labelKey)}</h3>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <cat.icon size={17} color={COLORS.accent} />
+                          <h3 className="font-display text-lg">{tr(cat.labelKey)}</h3>
+                        </div>
+                        {allItems.length > 3 && (
+                          <button onClick={() => toggleExpanded(cat.key)} className="text-xs font-mono" style={{ color: COLORS.accent }}>
+                            {isExpanded ? tr("showLess") : `${tr("viewAll")} (${allItems.length})`}
+                          </button>
+                        )}
                       </div>
                       {items.length === 0 ? (
                         <p className="text-sm" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
                       ) : (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3">
                           {items.map((l) => (
                             <PhotoCard
                               key={l.id}
@@ -1019,6 +1035,74 @@ export default function Booking() {
           </div>
         </div>
       )}
+
+      {/* Tour detail popup */}
+      {detailListing && (
+        <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center p-0 sm:p-6" style={{ background: "rgba(0,0,0,0.6)" }} onClick={() => setDetailListing(null)}>
+          <div
+            className="w-full sm:max-w-lg max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl"
+            style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-48 relative flex items-center justify-center overflow-hidden" style={{ background: `linear-gradient(135deg, ${detailListing.category.tint}, ${COLORS.surface2})` }}>
+              {detailListing.listing.image_url ? (
+                <img src={detailListing.listing.image_url} alt={detailListing.listing.name} className="w-full h-full object-cover" />
+              ) : (
+                <detailListing.category.icon size={54} color={COLORS.accent} />
+              )}
+              <button
+                onClick={() => setDetailListing(null)}
+                aria-label="Close"
+                className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(20,24,28,0.75)", backdropFilter: "blur(4px)" }}
+              >
+                <X size={16} color="#F2F0EA" />
+              </button>
+            </div>
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="font-display text-2xl leading-tight pr-3">{detailListing.listing.name}</h2>
+              </div>
+              <p className="font-mono text-sm mb-1">
+                <span style={{ color: COLORS.accent }}>₹{detailListing.listing.price}</span>
+                <span style={{ color: COLORS.muted }}>{detailListing.listing.unit}</span>
+              </p>
+              <p className="font-mono text-xs mb-4" style={{ color: COLORS.muted }}>
+                {detailListing.listing.tag}{detailListing.listing.hours ? ` · ${detailListing.listing.hours}h` : ""}
+              </p>
+
+              {detailListing.listing.description && (
+                <div className="mb-4">
+                  <p className="font-mono text-xs tracking-widest mb-1.5" style={{ color: COLORS.muted }}>{tr("aboutThisTour")}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: COLORS.text }}>{detailListing.listing.description}</p>
+                </div>
+              )}
+
+              {detailListing.listing.requirements && (
+                <div className="mb-4">
+                  <p className="font-mono text-xs tracking-widest mb-1.5" style={{ color: COLORS.muted }}>{tr("whatToKnow")}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: COLORS.text }}>{detailListing.listing.requirements}</p>
+                </div>
+              )}
+
+              <p className="flex items-center gap-1.5 text-xs mb-5" style={{ color: COLORS.muted }}>
+                <ShieldCheck size={12} /> {tr("cancellationPolicy")}
+              </p>
+
+              <button
+                onClick={() => {
+                  chooseListing(detailListing.category.key, detailListing.listing.id);
+                  setDetailListing(null);
+                }}
+                className="w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2"
+                style={{ background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentBright})`, color: COLORS.bg, boxShadow: `0 10px 26px ${COLORS.glow}` }}
+              >
+                {tr("bookNow")} <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1093,12 +1177,16 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
   );
 }
 
-function TourCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook }) {
+function TourCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, onCardClick }) {
   const Icon = category.icon;
   const isPopular = bookingCount >= 3;
   return (
     <div
-      className="shrink-0 rounded-2xl overflow-hidden flex flex-col snap-start"
+      onClick={onCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter") onCardClick(); }}
+      className="shrink-0 rounded-2xl overflow-hidden flex flex-col snap-start cursor-pointer"
       style={{
         width: "86%",
         maxWidth: 340,
@@ -1127,7 +1215,7 @@ function TourCard({ listing, category, colors, stats, bookingCount, popularLabel
         </span>
         {/* Save-for-trip button, labeled */}
         <button
-          onClick={onToggleTrip}
+          onClick={(e) => { e.stopPropagation(); onToggleTrip(); }}
           aria-label={inTrip ? addedToTripLabel : addToTripLabel}
           title={inTrip ? addedToTripLabel : addToTripLabel}
           className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center"
@@ -1155,7 +1243,7 @@ function TourCard({ listing, category, colors, stats, bookingCount, popularLabel
             <span className="text-sm" style={{ color: colors.muted }}>{listing.unit}</span>
           </p>
           <button
-            onClick={onBook}
+            onClick={(e) => { e.stopPropagation(); onBook(); }}
             className="py-2 px-5 rounded-lg text-sm font-semibold shrink-0"
             style={{
               background: selected ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentBright})` : colors.surface2,
@@ -1168,6 +1256,7 @@ function TourCard({ listing, category, colors, stats, bookingCount, popularLabel
         </div>
       </div>
     </div>
+
   );
 }
 
@@ -1230,3 +1319,4 @@ function Row({ label, value, colors }) {
     </div>
   );
 }
+

@@ -6,7 +6,7 @@ import { BUSINESS } from "../config.js";
 import { useTheme } from "../ThemeContext.jsx";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 
-const EMPTY_FORM = { category: "bike", name: "", price: "", unit: "/hr", tag: "", hours: "", active: true, image_url: "" };
+const EMPTY_FORM = { category: "bike", name: "", price: "", unit: "/hr", tag: "", hours: "", active: true, image_url: "", description: "", requirements: "" };
 
 export default function AdminDashboard() {
   const { colors: COLORS } = useTheme();
@@ -111,7 +111,7 @@ function ListingsTab() {
     setError("");
   }
   function openEdit(l) {
-    setForm({ ...l, price: String(l.price), hours: l.hours == null ? "" : String(l.hours), image_url: l.image_url || "" });
+    setForm({ ...l, price: String(l.price), hours: l.hours == null ? "" : String(l.hours), image_url: l.image_url || "", description: l.description || "", requirements: l.requirements || "" });
     setError("");
   }
 
@@ -128,6 +128,8 @@ function ListingsTab() {
       hours: form.hours === "" ? null : Number(form.hours),
       active: form.active,
       image_url: form.image_url.trim() || null,
+      description: form.description.trim() || null,
+      requirements: form.requirements.trim() || null,
     };
     if (!payload.name || Number.isNaN(payload.price)) {
       setError("Name and a valid price are required.");
@@ -259,6 +261,26 @@ function ListingsTab() {
               style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             />
             <p className="text-xs mb-3" style={{ color: COLORS.muted }}>Leave blank to show a styled placeholder instead.</p>
+
+            <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>DESCRIPTION (shown in the tour popup)</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="What does this tour/vehicle include? What's the experience like?"
+              rows={3}
+              className="w-full mb-3 px-3 py-2 rounded-md text-sm"
+              style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            />
+
+            <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>REQUIREMENTS / RULES (optional)</label>
+            <textarea
+              value={form.requirements}
+              onChange={(e) => setForm({ ...form, requirements: e.target.value })}
+              placeholder="Age limits, what to bring, fitness level, ID requirements, etc."
+              rows={3}
+              className="w-full mb-4 px-3 py-2 rounded-md text-sm"
+              style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            />
 
             <label className="flex items-center gap-2 mb-4 text-sm">
               <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
@@ -733,3 +755,4 @@ function TripRequestsTab() {
     </div>
   );
 }
+
