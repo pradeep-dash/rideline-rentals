@@ -9,6 +9,8 @@ export const BUSINESS = {
 
 export const SLOTS = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
 
+export const CANCELLATION_POLICY_HOURS = 24;
+
 export const CATEGORY_LABELS = { bike: "Bikes", car: "Cars", bus: "Buses", tour: "Tours" };
 
 export const DARK_COLORS = {

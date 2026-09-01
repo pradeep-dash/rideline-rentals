@@ -23,9 +23,13 @@ import {
   ClipboardList,
   Compass,
   Users,
+  Briefcase,
+  Plus,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
-import { BUSINESS, SLOTS } from "../config.js";
+import { BUSINESS, SLOTS, CANCELLATION_POLICY_HOURS } from "../config.js";
 import { useTheme } from "../ThemeContext.jsx";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 import LanguageToggle from "../components/LanguageToggle.jsx";
@@ -83,9 +87,32 @@ export default function Booking() {
 
   const [allListings, setAllListings] = useState({ bike: [], car: [], bus: [], tour: [] });
   const [reviewStats, setReviewStats] = useState({});
+  const [bookingCounts, setBookingCounts] = useState({});
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState("default");
+
+  // Trip Builder — a lightweight "save for a combined enquiry" list,
+  // separate from actually booking a specific slot.
+  const [myTrip, setMyTrip] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("rideline-trip") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [tripPanelOpen, setTripPanelOpen] = useState(false);
+  const [tripForm, setTripForm] = useState({ name: "", phone: "", email: "" });
+  const [tripSubmitting, setTripSubmitting] = useState(false);
+  const [tripSent, setTripSent] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("rideline-trip", JSON.stringify(myTrip));
+    } catch {
+      // ignore storage errors
+    }
+  }, [myTrip]);
 
   const [selected, setSelected] = useState(null); // { category, listingId }
   const days = useMemo(() => nextDays(14), []);
@@ -122,9 +149,10 @@ export default function Booking() {
   useEffect(() => {
     (async () => {
       setLoadingListings(true);
-      const [{ data: listingsData }, { data: statsData }] = await Promise.all([
+      const [{ data: listingsData }, { data: statsData }, { data: countsData }] = await Promise.all([
         supabase.from("listings").select("*").eq("active", true).order("price", { ascending: true }),
         supabase.from("review_stats").select("*"),
+        supabase.from("listing_booking_counts").select("*"),
       ]);
       const grouped = { bike: [], car: [], bus: [], tour: [] };
       (listingsData || []).forEach((l) => {
@@ -136,6 +164,11 @@ export default function Booking() {
         statsMap[s.listing_id] = s;
       });
       setReviewStats(statsMap);
+      const countsMap = {};
+      (countsData || []).forEach((c) => {
+        countsMap[c.listing_id] = c.booking_count;
+      });
+      setBookingCounts(countsMap);
       setLoadingListings(false);
     })();
   }, []);
@@ -195,6 +228,41 @@ export default function Booking() {
     setCouponError("");
     setReviewDone(false);
     setSelected({ category, listingId });
+  }
+
+  function isInTrip(listingId) {
+    return myTrip.some((item) => item.listingId === listingId);
+  }
+
+  function toggleTrip(listing, category) {
+    setMyTrip((prev) => {
+      if (prev.some((item) => item.listingId === listing.id)) {
+        return prev.filter((item) => item.listingId !== listing.id);
+      }
+      return [...prev, { listingId: listing.id, name: listing.name, category, price: listing.price, unit: listing.unit }];
+    });
+  }
+
+  function removeFromTrip(listingId) {
+    setMyTrip((prev) => prev.filter((item) => item.listingId !== listingId));
+  }
+
+  async function sendTripRequest(e) {
+    e.preventDefault();
+    if (!tripForm.name.trim() || !tripForm.phone.trim() || myTrip.length === 0) return;
+    setTripSubmitting(true);
+    await supabase.from("trip_enquiries").insert({
+      customer_name: tripForm.name.trim(),
+      customer_phone: tripForm.phone.trim(),
+      customer_email: tripForm.email.trim() || null,
+      items: myTrip,
+    });
+    const lines = myTrip.map((item) => `- ${item.name} (₹${item.price}${item.unit})`).join("%0A");
+    const msg = `Hi ${BUSINESS.name}! I'd like to plan a trip with:%0A%0A${lines}%0A%0AName: ${tripForm.name.trim()}%0APhone: ${tripForm.phone.trim()}`;
+    window.open(`https://wa.me/${BUSINESS.whatsapp}?text=${msg}`, "_blank");
+    setTripSubmitting(false);
+    setTripSent(true);
+    setMyTrip([]);
   }
 
   async function applyCoupon() {
@@ -635,6 +703,9 @@ export default function Booking() {
               >
                 {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{tr("confirmBooking")} <ChevronRight size={18} /></>}
               </button>
+              <p className="flex items-center justify-center gap-1.5 text-xs mt-3" style={{ color: COLORS.muted }}>
+                <ShieldCheck size={12} /> {tr("cancellationPolicy")}
+              </p>
 
               {/* Reviews */}
               <div className="mt-6 pt-5" style={{ borderTop: `1px solid ${COLORS.border}` }}>
@@ -750,8 +821,14 @@ export default function Booking() {
                             category={cat}
                             colors={COLORS}
                             stats={reviewStats[l.id]}
+                            bookingCount={bookingCounts[l.id] || 0}
+                            popularLabel={tr("popular")}
                             bookLabel={tr("book")}
                             selectedLabel={tr("selected")}
+                            addToTripLabel={tr("addToTrip")}
+                            addedToTripLabel={tr("addedToTrip")}
+                            inTrip={isInTrip(l.id)}
+                            onToggleTrip={() => toggleTrip(l, cat.key)}
                             selected={selected && selected.listingId === l.id}
                             onBook={() => chooseListing(cat.key, l.id)}
                           />
@@ -785,12 +862,94 @@ export default function Booking() {
         </a>
         <a href="/admin/login" className="text-xs font-mono opacity-40" style={{ color: COLORS.muted }}>{tr("admin")}</a>
       </footer>
+
+      {/* Floating Trip Builder button */}
+      {myTrip.length > 0 && !tripPanelOpen && (
+        <button
+          onClick={() => setTripPanelOpen(true)}
+          className="fixed bottom-5 right-5 z-30 flex items-center gap-2 px-5 py-3.5 rounded-full font-semibold text-sm"
+          style={{ background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentBright})`, color: COLORS.bg, boxShadow: `0 12px 30px ${COLORS.glow}` }}
+        >
+          <Briefcase size={16} /> {tr("myTrip")} ({myTrip.length})
+        </button>
+      )}
+
+      {tripPanelOpen && (
+        <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center p-0 sm:p-6" style={{ background: "rgba(0,0,0,0.6)" }}>
+          <div
+            className="w-full sm:max-w-md max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-5"
+            style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-2xl flex items-center gap-2"><Briefcase size={18} color={COLORS.accent} /> {tr("myTrip")}</h2>
+              <button onClick={() => { setTripPanelOpen(false); setTripSent(false); }} aria-label="Close">
+                <X size={18} color={COLORS.muted} />
+              </button>
+            </div>
+
+            {tripSent ? (
+              <p className="text-sm py-6 text-center" style={{ color: COLORS.whatsapp }}>{tr("tripRequestSent")}</p>
+            ) : myTrip.length === 0 ? (
+              <p className="text-sm" style={{ color: COLORS.muted }}>{tr("tripEmpty")}</p>
+            ) : (
+              <>
+                <div className="space-y-2 mb-5">
+                  {myTrip.map((item) => (
+                    <div key={item.listingId} className="flex items-center justify-between p-3 rounded-lg" style={{ background: COLORS.surface2 }}>
+                      <div>
+                        <p className="text-sm font-semibold">{item.name}</p>
+                        <p className="font-mono text-xs" style={{ color: COLORS.muted }}>₹{item.price}{item.unit}</p>
+                      </div>
+                      <button onClick={() => removeFromTrip(item.listingId)} aria-label={tr("removeFromTrip")}>
+                        <Trash2 size={15} color={COLORS.danger} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <form onSubmit={sendTripRequest} className="space-y-2.5">
+                  <input
+                    placeholder={tr("fullName")}
+                    value={tripForm.name}
+                    onChange={(e) => setTripForm({ ...tripForm, name: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-lg text-sm"
+                    style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  />
+                  <input
+                    placeholder={tr("phoneNumber")}
+                    value={tripForm.phone}
+                    onChange={(e) => setTripForm({ ...tripForm, phone: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-lg text-sm"
+                    style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  />
+                  <input
+                    type="email"
+                    placeholder={tr("emailAddress")}
+                    value={tripForm.email}
+                    onChange={(e) => setTripForm({ ...tripForm, email: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-lg text-sm"
+                    style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={tripSubmitting || !tripForm.name.trim() || !tripForm.phone.trim()}
+                    className="w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2"
+                    style={{ background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.accentBright})`, color: COLORS.bg }}
+                  >
+                    {tripSubmitting ? <Loader2 className="animate-spin" size={16} /> : tr("sendTripRequest")}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function PhotoCard({ listing, category, colors, stats, bookLabel, selectedLabel, selected, onBook }) {
+function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook }) {
   const Icon = category.icon;
+  const isPopular = bookingCount >= 3;
   return (
     <div
       className="shrink-0 w-52 sm:w-56 rounded-2xl overflow-hidden flex flex-col"
@@ -810,14 +969,29 @@ function PhotoCard({ listing, category, colors, stats, bookLabel, selectedLabel,
             <Icon size={38} color={colors.accent} style={{ position: "relative", filter: `drop-shadow(0 2px 8px ${colors.glow})` }} />
           </>
         )}
+        <button
+          onClick={onToggleTrip}
+          aria-label={inTrip ? addedToTripLabel : addToTripLabel}
+          className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center"
+          style={{ background: inTrip ? colors.accent : "rgba(20,24,28,0.75)", backdropFilter: "blur(4px)" }}
+        >
+          {inTrip ? <Check size={14} color={colors.bg} /> : <Plus size={14} color="#F2F0EA" />}
+        </button>
         <span className="absolute top-2 right-2 font-mono text-[10px] px-2 py-1 rounded-full z-10" style={{ background: "rgba(20,24,28,0.75)", color: "#F2F0EA", backdropFilter: "blur(4px)" }}>
           {listing.tag}{listing.hours ? ` · ${listing.hours}h` : ""}
         </span>
-        {stats && stats.review_count > 0 && (
-          <span className="absolute bottom-2 left-2 font-mono text-[10px] px-2 py-1 rounded-full z-10 flex items-center gap-1" style={{ background: "rgba(20,24,28,0.75)", color: "#F2F0EA", backdropFilter: "blur(4px)" }}>
-            <Star size={10} fill={colors.accent} color={colors.accent} /> {stats.avg_rating} ({stats.review_count})
-          </span>
-        )}
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between z-10">
+          {stats && stats.review_count > 0 ? (
+            <span className="font-mono text-[10px] px-2 py-1 rounded-full flex items-center gap-1" style={{ background: "rgba(20,24,28,0.75)", color: "#F2F0EA", backdropFilter: "blur(4px)" }}>
+              <Star size={10} fill={colors.accent} color={colors.accent} /> {stats.avg_rating} ({stats.review_count})
+            </span>
+          ) : <span />}
+          {isPopular && (
+            <span className="font-mono text-[10px] px-2 py-1 rounded-full" style={{ background: colors.accent, color: colors.bg }}>
+              {popularLabel}
+            </span>
+          )}
+        </div>
       </div>
       <div className="p-3.5 flex flex-col flex-1">
         <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2" style={{ color: colors.text }}>{listing.name}</p>
@@ -868,6 +1042,17 @@ function TicketView({ ticket, waLink, onReset, colors, business, tr }) {
         <div className="px-6 py-5 flex items-center justify-between">
           <span className="text-xs font-mono" style={{ color: colors.muted }}>CODE</span>
           <span className="font-display text-3xl tracking-[0.15em]" style={{ color: colors.accent }}>{ticket.code}</span>
+        </div>
+        <div className="flex justify-center pb-6">
+          <div className="p-2 rounded-xl" style={{ background: "#fff" }}>
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(`${business.name} booking ${ticket.code}`)}`}
+              alt="Booking QR code"
+              width="140"
+              height="140"
+              loading="lazy"
+            />
+          </div>
         </div>
       </div>
       <p className="text-center text-sm mt-6" style={{ color: colors.muted }}>Send this to {business.name} on WhatsApp to finalize pickup details.</p>

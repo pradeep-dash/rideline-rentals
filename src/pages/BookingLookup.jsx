@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Loader2, ArrowLeft } from "lucide-react";
+import { Search, Loader2, ArrowLeft, X } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
 import { useTheme } from "../ThemeContext.jsx";
 import { BUSINESS } from "../config.js";
@@ -12,15 +12,29 @@ export default function BookingLookup() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelDone, setCancelDone] = useState(false);
 
   async function search(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setLoading(true);
     setSearched(true);
+    setCancelDone(false);
     const { data } = await supabase.rpc("lookup_booking", { p_phone: phone.trim(), p_code: code.trim() });
     setResults(data || []);
     setLoading(false);
   }
+
+  async function cancelAll() {
+    if (!window.confirm("Cancel this booking? This can't be undone.")) return;
+    setCancelling(true);
+    await supabase.rpc("cancel_booking", { p_phone: phone.trim(), p_code: code.trim() });
+    setCancelling(false);
+    setCancelDone(true);
+    search();
+  }
+
+  const hasConfirmed = results && results.some((r) => r.status === "confirmed");
 
   return (
     <div className="min-h-screen font-body px-5 py-8" style={{ background: colors.bg, color: colors.text }}>
@@ -79,6 +93,20 @@ export default function BookingLookup() {
                     </p>
                   </div>
                 ))}
+
+                {hasConfirmed && (
+                  <button
+                    onClick={cancelAll}
+                    disabled={cancelling}
+                    className="w-full py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 mt-2"
+                    style={{ background: "rgba(242,107,107,0.12)", border: `1px solid ${colors.danger}`, color: colors.danger }}
+                  >
+                    {cancelling ? <Loader2 className="animate-spin" size={15} /> : <><X size={15} /> Cancel this booking</>}
+                  </button>
+                )}
+                {cancelDone && (
+                  <p className="text-xs text-center" style={{ color: colors.whatsapp }}>Cancelled. We won't hold your slot anymore.</p>
+                )}
               </div>
             ) : (
               <p className="text-sm" style={{ color: colors.muted }}>

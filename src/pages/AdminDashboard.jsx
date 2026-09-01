@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Plus, Pencil, Trash2, X, Loader2, ListChecks, CalendarDays, Tag, Star, BarChart3, Check as CheckIcon } from "lucide-react";
+import { LogOut, Plus, Pencil, Trash2, X, Loader2, ListChecks, CalendarDays, Tag, Star, BarChart3, Check as CheckIcon, Briefcase } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
 import { BUSINESS } from "../config.js";
 import { useTheme } from "../ThemeContext.jsx";
@@ -58,6 +58,7 @@ export default function AdminDashboard() {
           {[
             { id: "listings", label: "Listings", icon: ListChecks },
             { id: "bookings", label: "Bookings", icon: CalendarDays },
+            { id: "trips", label: "Trip Requests", icon: Briefcase },
             { id: "coupons", label: "Coupons", icon: Tag },
             { id: "reviews", label: "Reviews", icon: Star },
             { id: "analytics", label: "Analytics", icon: BarChart3 },
@@ -77,6 +78,7 @@ export default function AdminDashboard() {
       <div className="px-6 pb-16">
         {tab === "listings" && <ListingsTab />}
         {tab === "bookings" && <BookingsTab />}
+        {tab === "trips" && <TripRequestsTab />}
         {tab === "coupons" && <CouponsTab />}
         {tab === "reviews" && <ReviewsTab />}
         {tab === "analytics" && <AnalyticsTab />}
@@ -639,6 +641,95 @@ function AnalyticsTab() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function TripRequestsTab() {
+  const { colors: COLORS } = useTheme();
+  const [enquiries, setEnquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("new");
+
+  async function load() {
+    setLoading(true);
+    let query = supabase.from("trip_enquiries").select("*").order("created_at", { ascending: false });
+    if (filter !== "all") query = query.eq("status", filter);
+    const { data } = await query;
+    setEnquiries(data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, [filter]);
+
+  async function setStatus(id, status) {
+    await supabase.from("trip_enquiries").update({ status }).eq("id", id);
+    load();
+  }
+  async function remove(id) {
+    if (!window.confirm("Delete this trip request?")) return;
+    await supabase.from("trip_enquiries").delete().eq("id", id);
+    load();
+  }
+
+  return (
+    <div className="max-w-3xl">
+      <div className="flex items-center gap-2 mb-4">
+        {["new", "contacted", "closed", "all"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className="text-xs font-mono px-3 py-1.5 rounded-full capitalize"
+            style={{ background: filter === f ? COLORS.accent : COLORS.surface2, color: filter === f ? COLORS.bg : COLORS.muted }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <Loader2 className="animate-spin" style={{ color: COLORS.accent }} size={24} />
+      ) : enquiries.length === 0 ? (
+        <p className="text-sm" style={{ color: COLORS.muted }}>No trip requests here.</p>
+      ) : (
+        <div className="space-y-3">
+          {enquiries.map((eq) => (
+            <div key={eq.id} className="rounded-lg p-4" style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="font-semibold text-sm">{eq.customer_name}</p>
+                  <p className="font-mono text-xs" style={{ color: COLORS.muted }}>
+                    {eq.customer_phone}{eq.customer_email ? ` · ${eq.customer_email}` : ""}
+                  </p>
+                </div>
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full capitalize" style={{ background: COLORS.surface2, color: COLORS.muted }}>{eq.status}</span>
+              </div>
+              <ul className="text-sm mb-3 space-y-0.5">
+                {(eq.items || []).map((item, i) => (
+                  <li key={i} style={{ color: COLORS.text }}>• {item.name} <span style={{ color: COLORS.muted }}>(₹{item.price}{item.unit})</span></li>
+                ))}
+              </ul>
+              <div className="flex items-center gap-2">
+                {eq.status !== "contacted" && (
+                  <button onClick={() => setStatus(eq.id, "contacted")} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.text }}>
+                    Mark contacted
+                  </button>
+                )}
+                {eq.status !== "closed" && (
+                  <button onClick={() => setStatus(eq.id, "closed")} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.whatsapp }}>
+                    Mark closed
+                  </button>
+                )}
+                <button onClick={() => remove(eq.id)} className="text-xs font-mono px-2 py-1 rounded" style={{ background: COLORS.surface2, color: COLORS.danger }}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
