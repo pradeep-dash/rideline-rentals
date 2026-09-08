@@ -36,6 +36,8 @@ import { useTheme } from "../ThemeContext.jsx";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 import LanguageToggle from "../components/LanguageToggle.jsx";
 import { useLanguage, t } from "../i18n.js";
+import { ADSENSE_SLOTS } from "../config.js";
+import AdUnit from "../components/AdUnit.jsx";
 
 // Tours lead — vehicle rental is a supporting service, not the headline.
 const TOUR_CATEGORY = { key: "tour", labelKey: "tours", icon: Landmark, tint: "rgba(245,110,110,0.14)" };
@@ -558,6 +560,10 @@ export default function Booking() {
         </div>
       </section>
 
+      <div className="px-5 max-w-5xl mx-auto">
+        <AdUnit slot={ADSENSE_SLOTS.belowServices} />
+      </div>
+
       {/* Booking panel */}
       {selected && (
         <div ref={panelRef} style={{ scrollMarginTop: "72px" }} className="px-5 pb-2">
@@ -1004,6 +1010,10 @@ export default function Booking() {
               );
             })()}
 
+            <div className="px-5 max-w-5xl mx-auto">
+              <AdUnit slot={ADSENSE_SLOTS.midPage} />
+            </div>
+
             {/* Vehicle rental — supporting service, contained in its own panel */}
             <div className="pt-8 px-5">
               <div
@@ -1067,6 +1077,10 @@ export default function Booking() {
           </>
         )}
       </main>
+
+      <div className="px-5 max-w-5xl mx-auto">
+        <AdUnit slot={ADSENSE_SLOTS.footer} />
+      </div>
 
       {/* Footer */}
       <footer className="px-6 py-10 flex flex-col items-center gap-5" style={{ borderTop: `1px solid ${COLORS.border}` }}>

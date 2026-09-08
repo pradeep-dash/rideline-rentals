@@ -11,6 +11,16 @@ export const SLOTS = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];
 
 export const CANCELLATION_POLICY_HOURS = 24;
 
+// ---------- Google AdSense ----------
+// Replace with your real values once your AdSense account is approved.
+// See ADSENSE_SETUP.md for the full walkthrough.
+export const ADSENSE_CLIENT_ID = "ca-pub-XXXXXXXXXXXXXXXX";
+export const ADSENSE_SLOTS = {
+  belowServices: "1111111111",
+  midPage: "2222222222",
+  footer: "3333333333",
+};
+
 export const CATEGORY_LABELS = { bike: "Bikes", car: "Cars", bus: "Buses", tour: "Tours" };
 
 export const DARK_COLORS = {
@@ -42,3 +52,4 @@ export const LIGHT_COLORS = {
   border: "#E2DED5",
   danger: "#C13E3E",
 };
+
