@@ -55,6 +55,18 @@ const STRINGS = {
   cars: { en: "Cars", hi: "कार", or: "କାର୍" },
   buses: { en: "Buses", hi: "बस", or: "ବସ୍" },
   tours: { en: "Tours", hi: "टूर", or: "ଟୁର୍" },
+  packages: { en: "Packages", hi: "पैकेज", or: "ପ୍ୟାକେଜ୍" },
+  travels: { en: "Travels", hi: "यात्राएं", or: "ଯାତ୍ରା" },
+  packagesSectionSubtitle: {
+    en: "All-inclusive trips — stay, food, and sightseeing bundled together.",
+    hi: "सर्व-समावेशी यात्राएं — ठहरना, खाना और घूमना सब एक साथ।",
+    or: "ସର୍ବସମ୍ମିଳିତ ଯାତ୍ରା — ରହିବା, ଖାଦ୍ୟ ଏବଂ ଭ୍ରମଣ ଏକାଠି।",
+  },
+  travelsSectionSubtitle: {
+    en: "Not sure where you want to go? Book a car or bike with a driver/rider and roam as you please.",
+    hi: "पक्का नहीं कि कहाँ जाना है? ड्राइवर/राइडर के साथ कार या बाइक बुक करें और अपनी मर्ज़ी से घूमें।",
+    or: "କେଉଁଠି ଯିବେ ନିଶ୍ଚିତ ନାହିଁ? ଡ୍ରାଇଭର/ରାଇଡର ସହିତ କାର୍ କିମ୍ବା ବାଇକ୍ ବୁକ୍ କରନ୍ତୁ ଏବଂ ନିଜ ମର୍ଜିରେ ବୁଲନ୍ତୁ।",
+  },
   sortLabel: { en: "Sort", hi: "क्रम", or: "କ୍ରମ" },
   sortDefault: { en: "Default", hi: "डिफ़ॉल्ट", or: "ଡିଫଲ୍ଟ" },
   sortPriceLow: { en: "Price: Low to High", hi: "कीमत: कम से ज़्यादा", or: "ମୂଲ୍ୟ: କମରୁ ଅଧିକ" },

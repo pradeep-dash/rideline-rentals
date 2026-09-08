@@ -27,6 +27,8 @@ import {
   Plus,
   Trash2,
   ShieldCheck,
+  Package,
+  Route,
 } from "lucide-react";
 import { supabase } from "../supabaseClient.js";
 import { BUSINESS, SLOTS, CANCELLATION_POLICY_HOURS } from "../config.js";
@@ -37,6 +39,8 @@ import { useLanguage, t } from "../i18n.js";
 
 // Tours lead — vehicle rental is a supporting service, not the headline.
 const TOUR_CATEGORY = { key: "tour", labelKey: "tours", icon: Landmark, tint: "rgba(245,110,110,0.14)" };
+const PACKAGE_CATEGORY = { key: "package", labelKey: "packages", icon: Package, tint: "rgba(122,200,245,0.14)" };
+const TRAVEL_CATEGORY = { key: "travel", labelKey: "travels", icon: Route, tint: "rgba(180,140,245,0.14)" };
 const VEHICLE_CATEGORIES = [
   { key: "bike", labelKey: "bikes", icon: Bike, tint: "rgba(245,183,0,0.16)" },
   { key: "car", labelKey: "cars", icon: Car, tint: "rgba(37,211,102,0.14)" },
@@ -86,7 +90,7 @@ export default function Booking() {
   const { lang } = useLanguage();
   const tr = (key) => t(key, lang);
 
-  const [allListings, setAllListings] = useState({ bike: [], car: [], bus: [], tour: [] });
+  const [allListings, setAllListings] = useState({ bike: [], car: [], bus: [], tour: [], package: [], travel: [] });
   const [reviewStats, setReviewStats] = useState({});
   const [bookingCounts, setBookingCounts] = useState({});
   const [loadingListings, setLoadingListings] = useState(true);
@@ -164,6 +168,17 @@ export default function Booking() {
     setActiveTourIndex(idx);
   }
 
+  // Package carousel — same pattern as tours
+  const packageScrollRef = useRef(null);
+  const [activePackageIndex, setActivePackageIndex] = useState(0);
+  function handlePackageScroll() {
+    const el = packageScrollRef.current;
+    if (!el || !el.firstElementChild) return;
+    const cardWidth = el.firstElementChild.offsetWidth + 16;
+    const idx = Math.round(el.scrollLeft / cardWidth);
+    setActivePackageIndex(idx);
+  }
+
   useEffect(() => {
     (async () => {
       setLoadingListings(true);
@@ -172,7 +187,7 @@ export default function Booking() {
         supabase.from("review_stats").select("*"),
         supabase.from("listing_booking_counts").select("*"),
       ]);
-      const grouped = { bike: [], car: [], bus: [], tour: [] };
+      const grouped = { bike: [], car: [], bus: [], tour: [], package: [], travel: [] };
       (listingsData || []).forEach((l) => {
         if (grouped[l.category]) grouped[l.category].push(l);
       });
@@ -192,7 +207,7 @@ export default function Booking() {
   }, []);
 
   const listing = selected ? allListings[selected.category]?.find((l) => l.id === selected.listingId) : null;
-  const isMultiDayEligible = listing && listing.category !== "tour";
+  const isMultiDayEligible = listing && listing.category !== "tour" && listing.category !== "package";
 
   useEffect(() => {
     if (!selected || multiDay) return;
@@ -871,6 +886,124 @@ export default function Booking() {
               );
             })()}
 
+            {/* Packages — all-inclusive stay + food + sightseeing bundles */}
+            {(() => {
+              const cat = PACKAGE_CATEGORY;
+              const items = sortListings(allListings[cat.key].filter(matches));
+              if (term && items.length === 0) return null;
+              return (
+                <section id={cat.key} className="pt-8 px-5" style={{ scrollMarginTop: "72px" }}>
+                  <div className="max-w-5xl mx-auto mb-1">
+                    <div className="flex items-center gap-2">
+                      <cat.icon size={20} color={COLORS.accent} />
+                      <h2 className="font-display text-2xl">{tr(cat.labelKey)}</h2>
+                    </div>
+                    <p className="text-xs mt-0.5" style={{ color: COLORS.muted }}>{tr("packagesSectionSubtitle")}</p>
+                  </div>
+                  {items.length === 0 ? (
+                    <p className="text-sm max-w-5xl mx-auto mt-3" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
+                  ) : (
+                    <>
+                      <div
+                        ref={packageScrollRef}
+                        onScroll={handlePackageScroll}
+                        className="flex gap-4 overflow-x-auto pb-1 pt-4 max-w-5xl mx-auto snap-x snap-mandatory sm:snap-none no-scrollbar"
+                      >
+                        {items.map((l) => (
+                          <TourCard
+                            key={l.id}
+                            listing={l}
+                            category={cat}
+                            colors={COLORS}
+                            stats={reviewStats[l.id]}
+                            bookingCount={bookingCounts[l.id] || 0}
+                            popularLabel={tr("popular")}
+                            bookLabel={tr("book")}
+                            selectedLabel={tr("selected")}
+                            addToTripLabel={tr("addToTrip")}
+                            addedToTripLabel={tr("addedToTrip")}
+                            inTrip={isInTrip(l.id)}
+                            onToggleTrip={() => toggleTrip(l, cat.key)}
+                            selected={selected && selected.listingId === l.id}
+                            onBook={() => chooseListing(cat.key, l.id)}
+                            onCardClick={() => setDetailListing({ listing: l, category: cat })}
+                          />
+                        ))}
+                      </div>
+                      {items.length > 1 && (
+                        <div className="flex gap-1.5 justify-center mt-3 sm:hidden" aria-hidden="true">
+                          {items.map((_, i) => (
+                            <span
+                              key={i}
+                              className="h-1.5 rounded-full transition-all"
+                              style={{
+                                width: i === activePackageIndex ? 16 : 6,
+                                background: i === activePackageIndex ? COLORS.accent : COLORS.border,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </section>
+              );
+            })()}
+
+            {/* Travels — flexible chauffeur-driven roaming, not a fixed itinerary */}
+            {(() => {
+              const cat = TRAVEL_CATEGORY;
+              const allItems = sortListings(allListings[cat.key].filter(matches));
+              if (term && allItems.length === 0) return null;
+              const isExpanded = !!expandedCats[cat.key];
+              const items = isExpanded ? allItems : allItems.slice(0, 3);
+              return (
+                <section id={cat.key} className="pt-8 px-5" style={{ scrollMarginTop: "72px" }}>
+                  <div className="max-w-5xl mx-auto">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <cat.icon size={20} color={COLORS.accent} />
+                        <h2 className="font-display text-2xl">{tr(cat.labelKey)}</h2>
+                      </div>
+                      {allItems.length > 3 && (
+                        <button onClick={() => toggleExpanded(cat.key)} className="text-xs font-mono" style={{ color: COLORS.accent }}>
+                          {isExpanded ? tr("showLess") : `${tr("viewAll")} (${allItems.length})`}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs mb-4" style={{ color: COLORS.muted }}>{tr("travelsSectionSubtitle")}</p>
+                    {items.length === 0 ? (
+                      <p className="text-sm" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        {items.map((l) => (
+                          <PhotoCard
+                            key={l.id}
+                            listing={l}
+                            category={cat}
+                            colors={COLORS}
+                            stats={reviewStats[l.id]}
+                            bookingCount={bookingCounts[l.id] || 0}
+                            popularLabel={tr("popular")}
+                            bookLabel={tr("book")}
+                            selectedLabel={tr("selected")}
+                            addToTripLabel={tr("addToTrip")}
+                            addedToTripLabel={tr("addedToTrip")}
+                            inTrip={isInTrip(l.id)}
+                            onToggleTrip={() => toggleTrip(l, cat.key)}
+                            selected={selected && selected.listingId === l.id}
+                            onBook={() => chooseListing(cat.key, l.id)}
+                            onCardClick={() => setDetailListing({ listing: l, category: cat })}
+                            layout="grid"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              );
+            })()}
+
             {/* Vehicle rental — supporting service, contained in its own panel */}
             <div className="pt-8 px-5">
               <div
@@ -1071,19 +1204,28 @@ export default function Booking() {
                 {detailListing.listing.tag}{detailListing.listing.hours ? ` · ${detailListing.listing.hours}h` : ""}
               </p>
 
-              {detailListing.listing.description && (
-                <div className="mb-4">
-                  <p className="font-mono text-xs tracking-widest mb-1.5" style={{ color: COLORS.muted }}>{tr("aboutThisTour")}</p>
-                  <p className="text-sm leading-relaxed" style={{ color: COLORS.text }}>{detailListing.listing.description}</p>
-                </div>
-              )}
-
-              {detailListing.listing.requirements && (
-                <div className="mb-4">
-                  <p className="font-mono text-xs tracking-widest mb-1.5" style={{ color: COLORS.muted }}>{tr("whatToKnow")}</p>
-                  <p className="text-sm leading-relaxed" style={{ color: COLORS.text }}>{detailListing.listing.requirements}</p>
-                </div>
-              )}
+              {(() => {
+                const localizedDescription =
+                  (lang !== "en" && detailListing.listing[`description_${lang}`]) || detailListing.listing.description;
+                const localizedRequirements =
+                  (lang !== "en" && detailListing.listing[`requirements_${lang}`]) || detailListing.listing.requirements;
+                return (
+                  <>
+                    {localizedDescription && (
+                      <div className="mb-4">
+                        <p className="font-mono text-xs tracking-widest mb-1.5" style={{ color: COLORS.muted }}>{tr("aboutThisTour")}</p>
+                        <p className="text-sm leading-relaxed" style={{ color: COLORS.text }}>{localizedDescription}</p>
+                      </div>
+                    )}
+                    {localizedRequirements && (
+                      <div className="mb-4">
+                        <p className="font-mono text-xs tracking-widest mb-1.5" style={{ color: COLORS.muted }}>{tr("whatToKnow")}</p>
+                        <p className="text-sm leading-relaxed" style={{ color: COLORS.text }}>{localizedRequirements}</p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               <p className="flex items-center gap-1.5 text-xs mb-5" style={{ color: COLORS.muted }}>
                 <ShieldCheck size={12} /> {tr("cancellationPolicy")}
@@ -1107,13 +1249,17 @@ export default function Booking() {
   );
 }
 
-function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, layout = "scroll" }) {
+function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, onCardClick, layout = "scroll" }) {
   const Icon = category.icon;
   const isPopular = bookingCount >= 3;
   const isGrid = layout === "grid";
   return (
     <div
-      className={`${isGrid ? "w-full" : "shrink-0 w-52 sm:w-56"} rounded-2xl overflow-hidden flex flex-col`}
+      onClick={onCardClick}
+      role={onCardClick ? "button" : undefined}
+      tabIndex={onCardClick ? 0 : undefined}
+      onKeyDown={onCardClick ? (e) => { if (e.key === "Enter") onCardClick(); } : undefined}
+      className={`${isGrid ? "w-full" : "shrink-0 w-52 sm:w-56"} rounded-2xl overflow-hidden flex flex-col ${onCardClick ? "cursor-pointer" : ""}`}
       style={{ background: colors.surface, border: `1px solid ${selected ? colors.accent : colors.border}`, boxShadow: selected ? `0 8px 24px ${colors.glow}` : "0 2px 8px rgba(0,0,0,0.15)" }}
     >
       <div className="h-28 relative flex items-center justify-center overflow-hidden" style={{ background: `linear-gradient(135deg, ${category.tint}, ${colors.surface2})` }}>
@@ -1131,7 +1277,7 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
           </>
         )}
         <button
-          onClick={onToggleTrip}
+          onClick={(e) => { e.stopPropagation(); onToggleTrip(); }}
           aria-label={inTrip ? addedToTripLabel : addToTripLabel}
           title={inTrip ? addedToTripLabel : addToTripLabel}
           className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center"
@@ -1162,7 +1308,7 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
           <span style={{ color: colors.muted }}>{listing.unit}</span>
         </p>
         <button
-          onClick={onBook}
+          onClick={(e) => { e.stopPropagation(); onBook(); }}
           className="mt-auto w-full py-2 rounded-lg text-sm font-semibold"
           style={{
             background: selected ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentBright})` : colors.surface2,

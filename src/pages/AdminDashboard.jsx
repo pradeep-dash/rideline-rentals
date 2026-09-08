@@ -221,6 +221,8 @@ function ListingsTab() {
               <option value="car">Car</option>
               <option value="bus">Bus</option>
               <option value="tour">Tour</option>
+              <option value="package">Package</option>
+              <option value="travel">Travel</option>
             </select>
 
             <label className="block font-mono text-xs mb-1" style={{ color: COLORS.muted }}>NAME</label>
