@@ -600,17 +600,17 @@ export default function Booking() {
       </section>
 
       {/* About — narrative section with background photo */}
-      <section className="relative px-5 py-14 mb-8 overflow-hidden">
+      <section className="relative px-5 py-16 mb-8 overflow-hidden">
         <div
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(20,24,28,0.75) 40%, rgba(20,24,28,0.75) 60%, ${COLORS.bg} 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Boat_ride_on_Chilika_Lake%2C_Balugaon%2C_Odisha%2C_India.jpg')`,
+            backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(14,17,20,0.90) 12%, rgba(14,17,20,0.90) 88%, ${COLORS.bg} 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Shri_Jagannath_Temple%2CPuri.jpg')`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center 35%",
           }}
         />
         <div className="relative z-10 max-w-lg mx-auto text-center">
-          <p className="font-mono text-xs tracking-[0.2em] mb-2" style={{ color: COLORS.accentBright }}>{tr("aboutTag")}</p>
+          <p className="font-mono text-xs tracking-[0.2em] mb-2" style={{ color: "#FFD766" }}>{tr("aboutTag")}</p>
           <h2 className="font-accent text-3xl sm:text-4xl mb-4" style={{ color: "#FFFFFF" }}>{tr("aboutHeading")}</h2>
           <p className="text-sm leading-relaxed" style={{ color: "#E8E4DC" }}>{tr("aboutBody")}</p>
         </div>
@@ -1153,13 +1153,13 @@ export default function Booking() {
           <div
             className="absolute inset-0 z-0"
             style={{
-              backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(20,24,28,0.8) 35%, rgba(20,24,28,0.8) 65%, ${COLORS.bg} 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Similipal.jpg')`,
+              backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(14,17,20,0.90) 12%, rgba(14,17,20,0.90) 88%, ${COLORS.bg} 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Similipal.jpg')`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           />
           <div className="relative z-10 max-w-5xl mx-auto">
-            <p className="font-mono text-xs tracking-widest mb-5 text-center" style={{ color: COLORS.accentBright }}>{tr("testimonialsHeading")}</p>
+            <p className="font-mono text-xs tracking-widest mb-5 text-center" style={{ color: "#FFD766" }}>{tr("testimonialsHeading")}</p>
             <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory no-scrollbar">
               {testimonials.map((t, i) => (
                 <div
@@ -1169,7 +1169,7 @@ export default function Booking() {
                 >
                   <div className="flex items-center gap-1 mb-2">
                     {Array.from({ length: 5 }).map((_, si) => (
-                      <Star key={si} size={12} fill={si < t.rating ? COLORS.accentBright : "none"} color={COLORS.accentBright} />
+                      <Star key={si} size={12} fill={si < t.rating ? "#FFD766" : "none"} color="#FFD766" />
                     ))}
                   </div>
                   <p className="font-accent text-base leading-relaxed mb-3" style={{ color: "#F2F0EA" }}>"{t.comment}"</p>
