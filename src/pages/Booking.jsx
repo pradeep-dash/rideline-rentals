@@ -530,12 +530,12 @@ export default function Booking() {
             <p className="font-semibold text-xs leading-tight">{tr("serviceToursTitle")}</p>
           </a>
           <a
-            href="#bike"
+            href="#travel"
             className="flex items-center gap-2.5 p-2.5 rounded-xl"
             style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
-            <Car size={18} color={COLORS.accent} className="shrink-0" />
-            <p className="font-semibold text-xs leading-tight">{tr("serviceRentalTitle")}</p>
+            <Route size={18} color={COLORS.accent} className="shrink-0" />
+            <p className="font-semibold text-xs leading-tight">{tr("travels")}</p>
           </a>
           <a
             href={`https://wa.me/${BUSINESS.whatsapp}?text=Hi! I'd like help planning a custom trip.`}
@@ -1014,66 +1014,56 @@ export default function Booking() {
               <AdUnit slot={ADSENSE_SLOTS.midPage} />
             </div>
 
-            {/* Vehicle rental — supporting service, contained in its own panel */}
-            <div className="pt-8 px-5">
-              <div
-                className="max-w-5xl mx-auto rounded-2xl p-4 sm:p-5"
-                style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
-              >
-                <div className="text-center mb-5">
-                  <p className="font-mono text-xs tracking-widest mb-1" style={{ color: COLORS.accent }}>{tr("vehicleRentalHeading")}</p>
-                  <p className="text-sm" style={{ color: COLORS.muted }}>{tr("vehicleRentalSubtitle")}</p>
-                </div>
-
-                {VEHICLE_CATEGORIES.map((cat, i) => {
-                  const allItems = sortListings(allListings[cat.key].filter(matches));
-                  if (term && allItems.length === 0) return null;
-                  const isExpanded = !!expandedCats[cat.key];
-                  const items = isExpanded ? allItems : allItems.slice(0, 3);
-                  return (
-                    <section id={cat.key} key={cat.key} className={i > 0 ? "mt-6 pt-6" : ""} style={{ scrollMarginTop: "72px", borderTop: i > 0 ? `1px solid ${COLORS.border}` : "none" }}>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <cat.icon size={17} color={COLORS.accent} />
-                          <h3 className="font-display text-lg">{tr(cat.labelKey)}</h3>
-                        </div>
-                        {allItems.length > 3 && (
-                          <button onClick={() => toggleExpanded(cat.key)} className="text-xs font-mono" style={{ color: COLORS.accent }}>
-                            {isExpanded ? tr("showLess") : `${tr("viewAll")} (${allItems.length})`}
-                          </button>
-                        )}
+            {/* Bikes, Cars, Buses — plain fleet listing, no separate "service" framing */}
+            {VEHICLE_CATEGORIES.map((cat) => {
+              const allItems = sortListings(allListings[cat.key].filter(matches));
+              if (term && allItems.length === 0) return null;
+              const isExpanded = !!expandedCats[cat.key];
+              const items = isExpanded ? allItems : allItems.slice(0, 3);
+              return (
+                <section id={cat.key} key={cat.key} className="pt-8 px-5" style={{ scrollMarginTop: "72px" }}>
+                  <div className="max-w-5xl mx-auto">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <cat.icon size={20} color={COLORS.accent} />
+                        <h2 className="font-display text-2xl">{tr(cat.labelKey)}</h2>
                       </div>
-                      {items.length === 0 ? (
-                        <p className="text-sm" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
-                      ) : (
-                        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                          {items.map((l) => (
-                            <PhotoCard
-                              key={l.id}
-                              listing={l}
-                              category={cat}
-                              colors={COLORS}
-                              stats={reviewStats[l.id]}
-                              bookingCount={bookingCounts[l.id] || 0}
-                              popularLabel={tr("popular")}
-                              bookLabel={tr("book")}
-                              selectedLabel={tr("selected")}
-                              addToTripLabel={tr("addToTrip")}
-                              addedToTripLabel={tr("addedToTrip")}
-                              inTrip={isInTrip(l.id)}
-                              onToggleTrip={() => toggleTrip(l, cat.key)}
-                              selected={selected && selected.listingId === l.id}
-                              onBook={() => chooseListing(cat.key, l.id)}
-                              layout="grid"
-                            />
-                          ))}
-                        </div>
+                      {allItems.length > 3 && (
+                        <button onClick={() => toggleExpanded(cat.key)} className="text-xs font-mono" style={{ color: COLORS.accent }}>
+                          {isExpanded ? tr("showLess") : `${tr("viewAll")} (${allItems.length})`}
+                        </button>
                       )}
-                    </section>
-                  );
-                })}
-              </div>
-            </div>
+                    </div>
+                    {items.length === 0 ? (
+                      <p className="text-sm" style={{ color: COLORS.muted }}>No {tr(cat.labelKey).toLowerCase()} available right now.</p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        {items.map((l) => (
+                          <PhotoCard
+                            key={l.id}
+                            listing={l}
+                            category={cat}
+                            colors={COLORS}
+                            stats={reviewStats[l.id]}
+                            bookingCount={bookingCounts[l.id] || 0}
+                            popularLabel={tr("popular")}
+                            bookLabel={tr("book")}
+                            selectedLabel={tr("selected")}
+                            addToTripLabel={tr("addToTrip")}
+                            addedToTripLabel={tr("addedToTrip")}
+                            inTrip={isInTrip(l.id)}
+                            onToggleTrip={() => toggleTrip(l, cat.key)}
+                            selected={selected && selected.listingId === l.id}
+                            onBook={() => chooseListing(cat.key, l.id)}
+                            layout="grid"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              );
+            })}
           </>
         )}
       </main>

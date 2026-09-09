@@ -29,8 +29,6 @@ const STRINGS = {
   ourServices: { en: "WHAT WE OFFER", hi: "हम क्या प्रदान करते हैं", or: "ଆମେ କ'ଣ ପ୍ରଦାନ କରୁ" },
   serviceToursTitle: { en: "Sightseeing Tours", hi: "दर्शनीय यात्राएं", or: "ଦର୍ଶନୀୟ ଭ୍ରମଣ" },
   serviceToursDesc: { en: "Guided day trips across Bhubaneswar & Odisha", hi: "भुवनेश्वर और ओडिशा में गाइडेड डे ट्रिप", or: "ଭୁବନେଶ୍ୱର ଏବଂ ଓଡ଼ିଶାରେ ଗାଇଡେଡ୍ ଡେ ଟ୍ରିପ୍" },
-  serviceRentalTitle: { en: "Vehicle Rental", hi: "वाहन किराया", or: "ଗାଡ଼ି ଭଡ଼ା" },
-  serviceRentalDesc: { en: "Bikes, cars & buses — hourly or multi-day", hi: "बाइक, कार और बस — घंटे या कई दिनों के लिए", or: "ବାଇକ୍, କାର୍ ଏବଂ ବସ୍ — ଘଣ୍ଟା କିମ୍ବା ଏକାଧିକ ଦିନ ପାଇଁ" },
   serviceCustomTitle: { en: "Custom Trip Planning", hi: "कस्टम यात्रा योजना", or: "କଷ୍ଟମ୍ ଯାତ୍ରା ଯୋଜନା" },
   serviceCustomDesc: { en: "Tell us your plan, we'll tailor the rest", hi: "अपनी योजना बताएं, बाकी हम संभालेंगे", or: "ଆପଣଙ୍କ ଯୋଜନା କୁହନ୍ତୁ, ବାକି ଆମେ ସମ୍ଭାଳିବୁ" },
   serviceGroupTitle: { en: "Group & Corporate Travel", hi: "समूह और कॉर्पोरेट यात्रा", or: "ଗ୍ରୁପ୍ ଏବଂ କର୍ପୋରେଟ୍ ଯାତ୍ରା" },
@@ -43,12 +41,6 @@ const STRINGS = {
     en: "Our main offering — guided day trips across Odisha",
     hi: "हमारी मुख्य सेवा — ओडिशा भर में गाइडेड डे ट्रिप",
     or: "ଆମର ମୁଖ୍ୟ ସେବା — ଓଡ଼ିଶା ସାରା ଗାଇଡେଡ୍ ଡେ ଟ୍ରିପ୍",
-  },
-  vehicleRentalHeading: { en: "ALSO AVAILABLE — VEHICLE RENTAL", hi: "यह भी उपलब्ध — वाहन किराया", or: "ଏହା ମଧ୍ୟ ଉପଲବ୍ଧ — ଗାଡ଼ି ଭଡ଼ା" },
-  vehicleRentalSubtitle: {
-    en: "Need your own wheels for the trip? Rent a bike, car, or bus directly below.",
-    hi: "यात्रा के लिए अपनी सवारी चाहिए? नीचे से बाइक, कार या बस किराए पर लें।",
-    or: "ଯାତ୍ରା ପାଇଁ ନିଜର ଗାଡ଼ି ଦରକାର? ତଳୁ ବାଇକ୍, କାର୍ କିମ୍ବା ବସ୍ ଭଡ଼ାରେ ନିଅନ୍ତୁ।",
   },
 
   bikes: { en: "Bikes", hi: "बाइक", or: "ବାଇକ୍" },
