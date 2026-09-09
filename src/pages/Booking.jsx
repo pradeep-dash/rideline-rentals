@@ -1181,23 +1181,44 @@ export default function Booking() {
       )}
 
       {/* Why RideLine — detailed, substantive content instead of just marketing copy */}
-      <section className="px-5 py-14 max-w-5xl mx-auto">
-        <h2 className="font-display text-3xl sm:text-4xl text-center mb-10">{tr("whyDetailedHeading")}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <section className="px-5 py-14 max-w-3xl mx-auto">
+        <h2 className="font-display text-3xl sm:text-4xl text-center mb-10">{tr("whySection1Heading")}</h2>
+        <div className="flex flex-col gap-8">
           {[
             { icon: Compass, title: tr("why1Title"), body: tr("why1Body") },
             { icon: Clock, title: tr("why2Title"), body: tr("why2Body") },
             { icon: Tag, title: tr("why3Title"), body: tr("why3Body") },
             { icon: Route, title: tr("why4Title"), body: tr("why4Body") },
-            { icon: Users, title: tr("why5Title"), body: tr("why5Body") },
-            { icon: MessageCircle, title: tr("why6Title"), body: tr("why6Body") },
+            { icon: MessageCircle, title: tr("why5Title"), body: tr("why5Body") },
           ].map((item, i) => (
             <div key={i} className="flex gap-4">
               <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: COLORS.accentSoft }}>
                 <item.icon size={19} color={COLORS.accent} />
               </div>
               <div>
-                <h3 className="font-semibold text-base mb-1.5">{item.title}</h3>
+                <h3 className="font-semibold text-lg mb-1.5">{item.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: COLORS.muted }}>{item.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-5 py-14 max-w-3xl mx-auto" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+        <h2 className="font-display text-3xl sm:text-4xl text-center mb-10 mt-4">{tr("whySection2Heading")}</h2>
+        <div className="flex flex-col gap-8">
+          {[
+            { icon: Landmark, title: tr("help1Title"), body: tr("help1Body") },
+            { icon: Users, title: tr("help2Title"), body: tr("help2Body") },
+            { icon: CalendarRange, title: tr("help3Title"), body: tr("help3Body") },
+            { icon: MessageCircle, title: tr("help4Title"), body: tr("help4Body") },
+          ].map((item, i) => (
+            <div key={i} className="flex gap-4">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: COLORS.accentSoft }}>
+                <item.icon size={19} color={COLORS.accent} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1.5">{item.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: COLORS.muted }}>{item.body}</p>
               </div>
             </div>
@@ -1208,13 +1229,13 @@ export default function Booking() {
       <div className="px-5 max-w-5xl mx-auto">
         <AdUnit slot={ADSENSE_SLOTS.footer} />
       </div>
-
+      
       {/* Footer */}
-      <footer className="relative pt-12 pb-8 overflow-hidden" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+      <footer className="relative pt-12 pb-8 overflow-hidden">
         <div
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(20,24,28,0.85) 25%, rgba(20,24,28,0.85) 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Lingaraj_temple_Bhubaneswar.jpg')`,
+            backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(14,17,20,0.94) 16%, rgba(14,17,20,0.94) 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Lingaraj_temple_Bhubaneswar.jpg')`,
             backgroundSize: "cover",
             backgroundPosition: "center 20%",
           }}
@@ -1222,49 +1243,49 @@ export default function Booking() {
         <div className="relative z-10">
         <div className="px-6 max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10 mb-10">
           <div>
-            <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accent }}>{tr("footerQuickLinks")}</p>
+            <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accentBright }}>{tr("footerQuickLinks")}</p>
             <div className="flex flex-col gap-2 text-sm">
-              <a href="#tour" style={{ color: COLORS.muted }}>{tr("tours")}</a>
-              <a href="#package" style={{ color: COLORS.muted }}>{tr("packages")}</a>
-              <a href="#travel" style={{ color: COLORS.muted }}>{tr("travels")}</a>
-              <a href="/lookup" className="flex items-center gap-1.5" style={{ color: COLORS.muted }}>
+              <a href="#tour" style={{ color: "#D8D3C7" }}>{tr("tours")}</a>
+              <a href="#package" style={{ color: "#D8D3C7" }}>{tr("packages")}</a>
+              <a href="#travel" style={{ color: "#D8D3C7" }}>{tr("travels")}</a>
+              <a href="/lookup" className="flex items-center gap-1.5" style={{ color: "#D8D3C7" }}>
                 <ClipboardList size={13} /> {tr("checkBooking")}
               </a>
             </div>
           </div>
           <div>
-            <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accent }}>{tr("footerFindUs")}</p>
-            <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${COLORS.border}`, height: 160 }}>
+            <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accentBright }}>{tr("footerFindUs")}</p>
+            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.15)", height: 160 }}>
               <iframe
                 title="Location map"
                 width="100%"
                 height="100%"
-                style={{ border: 0, filter: themeMode === "dark" ? "invert(90%) hue-rotate(180deg)" : "none" }}
+                style={{ border: 0, filter: "invert(90%) hue-rotate(180deg)" }}
                 loading="lazy"
                 src={`https://www.google.com/maps?q=${encodeURIComponent(BUSINESS.location)}&output=embed`}
               />
             </div>
-            <p className="flex items-center gap-1.5 text-xs mt-2" style={{ color: COLORS.muted }}>
+            <p className="flex items-center gap-1.5 text-xs mt-2" style={{ color: "#D8D3C7" }}>
               <MapPin size={12} /> {BUSINESS.location}
             </p>
           </div>
         </div>
 
         <div className="flex flex-col items-center gap-5 px-6">
-          <p className="font-mono text-xs tracking-widest" style={{ color: COLORS.muted }}>{tr("questionsReachUs")}</p>
+          <p className="font-mono text-xs tracking-widest" style={{ color: "#D8D3C7" }}>{tr("questionsReachUs")}</p>
           <div className="flex gap-3 flex-wrap justify-center">
-            <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
+            <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#F2F0EA" }}>
               <MessageCircle size={16} color={COLORS.whatsapp} /> WhatsApp
             </a>
-            <a href={`https://instagram.com/${BUSINESS.instagram}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-              <Instagram size={16} color={COLORS.accent} /> Instagram
+            <a href={`https://instagram.com/${BUSINESS.instagram}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#F2F0EA" }}>
+              <Instagram size={16} color={COLORS.accentBright} /> Instagram
             </a>
-            <a href={`https://facebook.com/${BUSINESS.facebook}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-              <Facebook size={16} color={COLORS.accent} /> Facebook
+            <a href={`https://facebook.com/${BUSINESS.facebook}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#F2F0EA" }}>
+              <Facebook size={16} color={COLORS.accentBright} /> Facebook
             </a>
           </div>
-          <a href="/admin/login" className="text-xs font-mono opacity-40" style={{ color: COLORS.muted }}>{tr("admin")}</a>
-          <p className="text-[11px] font-mono opacity-50 text-center">
+          <a href="/admin/login" className="text-xs font-mono" style={{ color: "rgba(216,211,199,0.4)" }}>{tr("admin")}</a>
+          <p className="text-[11px] font-mono text-center" style={{ color: "rgba(216,211,199,0.6)" }}>
             © {new Date().getFullYear()} {BUSINESS.name}. {tr("allRightsReserved")}
           </p>
         </div>
@@ -1490,7 +1511,7 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
         <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2" style={{ color: colors.text }}>{listing.name}</p>
         <p className={`font-mono text-sm ${bookable ? "mb-3" : ""}`}>
           <span style={{ color: colors.accent }}>₹{listing.price}</span>
-          <span style={{ color: colors.muted }}>{listing.unit}</span>
+          {bookable && <span style={{ color: colors.muted }}>{listing.unit}</span>}
         </p>
         {bookable && (
           <button
