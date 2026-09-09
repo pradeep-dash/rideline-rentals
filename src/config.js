@@ -1,7 +1,7 @@
 // Edit these to your real business details.
 export const BUSINESS = {
   name: "RideLine Tours & Travels",
-  whatsapp: "911234567890", // country code + number, no + or spaces
+  whatsapp: "919583318843", // country code + number, no + or spaces
   instagram: "ridelinerentals",
   facebook: "ridelinerentals",
   // Used in the header, footer, and the map embed — put your real office

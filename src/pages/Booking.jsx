@@ -537,7 +537,7 @@ export default function Booking() {
           <a
             href="#tour"
             className="flex items-center gap-2.5 p-2.5 rounded-xl"
-            style={{ background: `linear-gradient(160deg, ${COLORS.accentSoft}, ${COLORS.surface})`, border: `1px solid ${COLORS.accent}` }}
+            style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}` }}
           >
             <Landmark size={18} color={COLORS.accent} className="shrink-0" />
             <p className="font-semibold text-xs leading-tight">{tr("serviceToursTitle")}</p>
@@ -1274,7 +1274,7 @@ export default function Booking() {
         <div className="flex flex-col items-center gap-5 px-6">
           <p className="font-mono text-xs tracking-widest" style={{ color: "#D8D3C7" }}>{tr("questionsReachUs")}</p>
           <div className="flex gap-3 flex-wrap justify-center">
-            <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#F2F0EA" }}>
+            <a href={`https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(`Hi ${BUSINESS.name}! I'd like to know more.`)}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#F2F0EA" }}>
               <MessageCircle size={16} color={COLORS.whatsapp} /> WhatsApp
             </a>
             <a href={`https://instagram.com/${BUSINESS.instagram}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#F2F0EA" }}>
