@@ -437,11 +437,12 @@ export default function Booking() {
 
   function waLink() {
     if (!ticket) return "#";
-    const label = ticket.type === "tour" ? "Tour" : "Vehicle";
+    const labels = { tour: "Tour", package: "Package", travel: "Travel" };
+    const label = labels[ticket.type] || "Vehicle";
     const durationLine =
       ticket.type === "tour" && ticket.hours ? `%0ADuration: ${ticket.tag} (${ticket.hours} hrs)` : "";
     const priceLine = `%0ATotal: ₹${ticket.price}${ticket.unit || ""}`;
-    const msg = `Hi ${BUSINESS.name}! I'd like to confirm my booking:%0A%0A${label}: ${ticket.vehicle}%0ADate: ${ticket.date}%0ATime: ${ticket.slot}${durationLine}${priceLine}%0AName: ${ticket.name}%0APhone: ${ticket.phone}%0ABooking code: ${ticket.code}`;
+    const msg = `Hi ${BUSINESS.name}! I'd like to confirm my booking:%0A%0A${label}: ${ticket.vehicle}%0ADate: ${ticket.date}%0ATime: ${ticket.slot}${durationLine}${priceLine}%0AName: ${ticket.name}%0APhone: ${ticket.phone}%0AEmail: ${ticket.email}%0ABooking code: ${ticket.code}`;
     return `https://wa.me/${BUSINESS.whatsapp}?text=${msg}`;
   }
 
