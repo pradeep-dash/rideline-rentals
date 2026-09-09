@@ -1047,15 +1047,8 @@ export default function Booking() {
                             stats={reviewStats[l.id]}
                             bookingCount={bookingCounts[l.id] || 0}
                             popularLabel={tr("popular")}
-                            bookLabel={tr("book")}
-                            selectedLabel={tr("selected")}
-                            addToTripLabel={tr("addToTrip")}
-                            addedToTripLabel={tr("addedToTrip")}
-                            inTrip={isInTrip(l.id)}
-                            onToggleTrip={() => toggleTrip(l, cat.key)}
-                            selected={selected && selected.listingId === l.id}
-                            onBook={() => chooseListing(cat.key, l.id)}
                             layout="grid"
+                            bookable={false}
                           />
                         ))}
                       </div>
@@ -1253,7 +1246,7 @@ export default function Booking() {
   );
 }
 
-function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, onCardClick, layout = "scroll" }) {
+function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, onCardClick, layout = "scroll", bookable = true }) {
   const Icon = category.icon;
   const isPopular = bookingCount >= 3;
   const isGrid = layout === "grid";
@@ -1280,15 +1273,17 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
             <Icon size={38} color={colors.accent} style={{ position: "relative", filter: `drop-shadow(0 2px 8px ${colors.glow})` }} />
           </>
         )}
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleTrip(); }}
-          aria-label={inTrip ? addedToTripLabel : addToTripLabel}
-          title={inTrip ? addedToTripLabel : addToTripLabel}
-          className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center"
-          style={{ background: inTrip ? colors.accent : "rgba(20,24,28,0.75)", backdropFilter: "blur(4px)" }}
-        >
-          {inTrip ? <Check size={14} color={colors.bg} /> : <Plus size={14} color="#F2F0EA" />}
-        </button>
+        {bookable && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleTrip(); }}
+            aria-label={inTrip ? addedToTripLabel : addToTripLabel}
+            title={inTrip ? addedToTripLabel : addToTripLabel}
+            className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ background: inTrip ? colors.accent : "rgba(20,24,28,0.75)", backdropFilter: "blur(4px)" }}
+          >
+            {inTrip ? <Check size={14} color={colors.bg} /> : <Plus size={14} color="#F2F0EA" />}
+          </button>
+        )}
         <span className="absolute top-2 right-2 font-mono text-[10px] px-2 py-1 rounded-full z-10" style={{ background: "rgba(20,24,28,0.75)", color: "#F2F0EA", backdropFilter: "blur(4px)" }}>
           {listing.tag}{listing.hours ? ` · ${listing.hours}h` : ""}
         </span>
@@ -1311,17 +1306,19 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
           <span style={{ color: colors.accent }}>₹{listing.price}</span>
           <span style={{ color: colors.muted }}>{listing.unit}</span>
         </p>
-        <button
-          onClick={(e) => { e.stopPropagation(); onBook(); }}
-          className="mt-auto w-full py-2 rounded-lg text-sm font-semibold"
-          style={{
-            background: selected ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentBright})` : colors.surface2,
-            color: selected ? colors.bg : colors.text,
-            border: selected ? "none" : `1px solid ${colors.border}`,
-          }}
-        >
-          {selected ? selectedLabel : bookLabel}
-        </button>
+        {bookable && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onBook(); }}
+            className="mt-auto w-full py-2 rounded-lg text-sm font-semibold"
+            style={{
+              background: selected ? `linear-gradient(135deg, ${colors.accent}, ${colors.accentBright})` : colors.surface2,
+              color: selected ? colors.bg : colors.text,
+              border: selected ? "none" : `1px solid ${colors.border}`,
+            }}
+          >
+            {selected ? selectedLabel : bookLabel}
+          </button>
+        )}
       </div>
     </div>
   );
