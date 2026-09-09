@@ -1134,6 +1134,7 @@ export default function Booking() {
                             popularLabel={tr("popular")}
                             layout="grid"
                             bookable={false}
+                            showPrice={cat.key === "bus"}
                           />
                         ))}
                       </div>
@@ -1453,7 +1454,7 @@ export default function Booking() {
   );
 }
 
-function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, onCardClick, layout = "scroll", bookable = true }) {
+function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabel, bookLabel, selectedLabel, addToTripLabel, addedToTripLabel, inTrip, onToggleTrip, selected, onBook, onCardClick, layout = "scroll", bookable = true, showPrice = true }) {
   const Icon = category.icon;
   const isPopular = bookingCount >= 3;
   const isGrid = layout === "grid";
@@ -1509,10 +1510,12 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
       </div>
       <div className={`${isGrid ? "p-3" : "p-3.5"} flex flex-col ${bookable ? "flex-1" : ""}`}>
         <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2" style={{ color: colors.text }}>{listing.name}</p>
-        <p className={`font-mono text-sm ${bookable ? "mb-3" : ""}`}>
-          <span style={{ color: colors.accent }}>₹{listing.price}</span>
-          {bookable && <span style={{ color: colors.muted }}>{listing.unit}</span>}
-        </p>
+        {showPrice && (
+          <p className={`font-mono text-sm ${bookable ? "mb-3" : ""}`}>
+            <span style={{ color: colors.accent }}>₹{listing.price}</span>
+            {bookable && <span style={{ color: colors.muted }}>{listing.unit}</span>}
+          </p>
+        )}
         {bookable && (
           <button
             onClick={(e) => { e.stopPropagation(); onBook(); }}
