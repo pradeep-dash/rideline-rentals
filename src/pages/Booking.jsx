@@ -1180,12 +1180,46 @@ export default function Booking() {
         </section>
       )}
 
+      {/* Why RideLine — detailed, substantive content instead of just marketing copy */}
+      <section className="px-5 py-14 max-w-5xl mx-auto">
+        <h2 className="font-display text-3xl sm:text-4xl text-center mb-10">{tr("whyDetailedHeading")}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {[
+            { icon: Compass, title: tr("why1Title"), body: tr("why1Body") },
+            { icon: Clock, title: tr("why2Title"), body: tr("why2Body") },
+            { icon: Tag, title: tr("why3Title"), body: tr("why3Body") },
+            { icon: Route, title: tr("why4Title"), body: tr("why4Body") },
+            { icon: Users, title: tr("why5Title"), body: tr("why5Body") },
+            { icon: MessageCircle, title: tr("why6Title"), body: tr("why6Body") },
+          ].map((item, i) => (
+            <div key={i} className="flex gap-4">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: COLORS.accentSoft }}>
+                <item.icon size={19} color={COLORS.accent} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-base mb-1.5">{item.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: COLORS.muted }}>{item.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <div className="px-5 max-w-5xl mx-auto">
         <AdUnit slot={ADSENSE_SLOTS.footer} />
       </div>
 
       {/* Footer */}
-      <footer className="pt-12 pb-8" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+      <footer className="relative pt-12 pb-8 overflow-hidden" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(20,24,28,0.85) 25%, rgba(20,24,28,0.85) 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Lingaraj_temple_Bhubaneswar.jpg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center 20%",
+          }}
+        />
+        <div className="relative z-10">
         <div className="px-6 max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10 mb-10">
           <div>
             <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accent }}>{tr("footerQuickLinks")}</p>
@@ -1233,6 +1267,7 @@ export default function Booking() {
           <p className="text-[11px] font-mono opacity-50 text-center">
             © {new Date().getFullYear()} {BUSINESS.name}. {tr("allRightsReserved")}
           </p>
+        </div>
         </div>
       </footer>
 

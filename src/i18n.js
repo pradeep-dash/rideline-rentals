@@ -140,6 +140,44 @@ const STRINGS = {
   footerQuickLinks: { en: "QUICK LINKS", hi: "त्वरित लिंक", or: "ଦ୍ରୁତ ଲିଙ୍କ୍" },
   footerFindUs: { en: "FIND US", hi: "हमें खोजें", or: "ଆମକୁ ଖୋଜନ୍ତୁ" },
   allRightsReserved: { en: "All rights reserved.", hi: "सर्वाधिकार सुरक्षित।", or: "ସର୍ବସ୍ୱତ୍ୱ ସଂରକ୍ଷିତ।" },
+
+  whyDetailedHeading: { en: "Why Plan Your Trip With RideLine", hi: "RideLine के साथ अपनी यात्रा की योजना क्यों बनाएं", or: "RideLine ସହିତ ଆପଣଙ୍କ ଯାତ୍ରା ଯୋଜନା କାହିଁକି କରିବେ" },
+  why1Title: { en: "Local Knowledge, Real Recommendations", hi: "स्थानीय जानकारी, असली सलाह", or: "ସ୍ଥାନୀୟ ଜ୍ଞାନ, ପ୍ରକୃତ ପରାମର୍ଶ" },
+  why1Body: {
+    en: "We're based in Bhubaneswar ourselves — every tour, package, and route comes from people who've actually been there, not a script.",
+    hi: "हम खुद भुवनेश्वर में स्थित हैं — हर टूर, पैकेज और रूट उन लोगों से आता है जो वहां वाकई जा चुके हैं, किसी स्क्रिप्ट से नहीं।",
+    or: "ଆମେ ନିଜେ ଭୁବନେଶ୍ୱରରେ ଅବସ୍ଥିତ — ପ୍ରତ୍ୟେକ ଟୁର୍, ପ୍ୟାକେଜ୍ ଏବଂ ରୁଟ୍ ପ୍ରକୃତରେ ସେଠାରେ ଯାଇଥିବା ଲୋକଙ୍କଠାରୁ ଆସେ, କୌଣସି ସ୍କ୍ରିପ୍ଟରୁ ନୁହେଁ।",
+  },
+  why2Title: { en: "Time Saved, Stress Skipped", hi: "समय बचे, तनाव न हो", or: "ସମୟ ସାଶ୍ରୟ, ଚିନ୍ତାମୁକ୍ତ" },
+  why2Body: {
+    en: "From temple timings to which beach gets crowded by noon, we've done the research so you don't have to.",
+    hi: "मंदिर के समय से लेकर दोपहर तक कौन सा समुद्र तट भीड़भाड़ वाला हो जाता है, हमने यह जानकारी पहले ही जुटा ली है ताकि आपको न करनी पड़े।",
+    or: "ମନ୍ଦିର ସମୟଠାରୁ ଆରମ୍ଭ କରି ମଧ୍ୟାହ୍ନ ସୁଦ୍ଧା କେଉଁ ବେଳାଭୂମି ଭିଡ଼ ହୋଇଯାଏ, ଆମେ ଏହି ଅନୁସନ୍ଧାନ ପୂର୍ବରୁ କରିସାରିଛୁ ଯାହା ଫଳରେ ଆପଣଙ୍କୁ କରିବାକୁ ପଡ଼ିବ ନାହିଁ।",
+  },
+  why3Title: { en: "Transparent Pricing", hi: "पारदर्शी कीमत", or: "ସ୍ୱଚ୍ଛ ମୂଲ୍ୟ" },
+  why3Body: {
+    en: "The price you see is the price you pay — no hidden charges added at checkout, no surprise convenience fees.",
+    hi: "जो कीमत आप देखते हैं वही आप चुकाते हैं — चेकआउट पर कोई छिपा शुल्क नहीं, कोई अचानक सुविधा शुल्क नहीं।",
+    or: "ଆପଣ ଯେଉଁ ମୂଲ୍ୟ ଦେଖନ୍ତି ତାହା ହିଁ ଆପଣ ଦିଅନ୍ତି — ଚେକଆଉଟ୍ ରେ କୌଣସି ଲୁକ୍କାୟିତ ଚାର୍ଜ ନାହିଁ, କୌଣସି ହଠାତ୍ ସୁବିଧା ଶୁଳ୍କ ନାହିଁ।",
+  },
+  why4Title: { en: "Flexible By Design", hi: "लचीलापन, हमारी डिज़ाइन में", or: "ନମନୀୟତା, ଆମର ଡିଜାଇନରେ" },
+  why4Body: {
+    en: "Book a fixed tour, a full package, or just a car and driver to roam as you please — whatever fits how you actually want to travel.",
+    hi: "एक तय टूर बुक करें, पूरा पैकेज लें, या बस एक कार और ड्राइवर लेकर अपनी मर्ज़ी से घूमें — जो भी आपके यात्रा करने के तरीके के अनुकूल हो।",
+    or: "ଏକ ନିର୍ଦ୍ଧାରିତ ଟୁର୍ ବୁକ୍ କରନ୍ତୁ, ପୂର୍ଣ୍ଣ ପ୍ୟାକେଜ୍ ନିଅନ୍ତୁ, କିମ୍ବା କେବଳ ଏକ କାର୍ ଏବଂ ଡ୍ରାଇଭର ନେଇ ନିଜ ମର୍ଜିରେ ବୁଲନ୍ତୁ — ଯାହା ମଧ୍ୟ ଆପଣ ପ୍ରକୃତରେ ଯାତ୍ରା କରିବାକୁ ଚାହାଁନ୍ତି ତାହା ସହିତ ମେଳ ଖାଏ।",
+  },
+  why5Title: { en: "Built for Groups Too", hi: "समूहों के लिए भी उपयुक्त", or: "ଗ୍ରୁପ୍ ପାଇଁ ମଧ୍ୟ ଉପଯୁକ୍ତ" },
+  why5Body: {
+    en: "Planning for a family, a friend circle, or a corporate offsite? We handle group logistics without the usual back-and-forth.",
+    hi: "परिवार, दोस्तों के समूह, या कॉर्पोरेट ऑफसाइट की योजना बना रहे हैं? हम सामान्य आगे-पीछे की बातचीत के बिना समूह की व्यवस्था संभालते हैं।",
+    or: "ପରିବାର, ବନ୍ଧୁ ଗ୍ରୁପ୍, କିମ୍ବା କର୍ପୋରେଟ୍ ଅଫସାଇଟ୍ ଯୋଜନା କରୁଛନ୍ତି? ଆମେ ସାଧାରଣ ଆଗପଛ ବାର୍ତ୍ତାଳାପ ବିନା ଗ୍ରୁପ୍ ବ୍ୟବସ୍ଥା ସମ୍ଭାଳୁ।",
+  },
+  why6Title: { en: "Always Reachable", hi: "हमेशा उपलब्ध", or: "ସର୍ବଦା ଉପଲବ୍ଧ" },
+  why6Body: {
+    en: "Every booking confirms straight to WhatsApp, and a real person answers when you have questions — not a chatbot loop.",
+    hi: "हर बुकिंग सीधे WhatsApp पर पक्की होती है, और जब आपके सवाल हों तो एक असली इंसान जवाब देता है — कोई चैटबॉट लूप नहीं।",
+    or: "ପ୍ରତ୍ୟେକ ବୁକିଂ ସିଧାସଳଖ WhatsApp ରେ ନିଶ୍ଚିତ ହୁଏ, ଏବଂ ଆପଣଙ୍କ ପ୍ରଶ୍ନ ଥିଲେ ଜଣେ ପ୍ରକୃତ ବ୍ୟକ୍ତି ଉତ୍ତର ଦିଅନ୍ତି — କୌଣସି ଚାଟବଟ୍ ଲୁପ୍ ନୁହେଁ।",
+  },
 };
 
 export function t(key, lang) {
