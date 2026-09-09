@@ -42,6 +42,12 @@ const STRINGS = {
     hi: "हमारी मुख्य सेवा — ओडिशा भर में गाइडेड डे ट्रिप",
     or: "ଆମର ମୁଖ୍ୟ ସେବା — ଓଡ଼ିଶା ସାରା ଗାଇଡେଡ୍ ଡେ ଟ୍ରିପ୍",
   },
+  ourFleetHeading: { en: "OUR FLEET", hi: "हमारा फ्लीट", or: "ଆମର ଫ୍ଲିଟ୍" },
+  ourFleetSubtitle: {
+    en: "A look at the bikes, cars, and buses we work with. Want to actually take one out? Book a driver or rider through Travels above, or reach us on WhatsApp.",
+    hi: "हमारे साथ काम करने वाली बाइक, कार और बसों की एक झलक। किसी एक को असल में लेना है? ऊपर ट्रैवल्स के ज़रिए ड्राइवर या राइडर बुक करें, या WhatsApp पर संपर्क करें।",
+    or: "ଆମ ସହିତ କାମ କରୁଥିବା ବାଇକ୍, କାର୍ ଏବଂ ବସ୍ର ଏକ ଝଲକ। ପ୍ରକୃତରେ ଗୋଟିଏ ନେବାକୁ ଚାହୁଁଛନ୍ତି? ଉପରେ ଥିବା ଟ୍ରାଭେଲ୍ସ ମାଧ୍ୟମରେ ଡ୍ରାଇଭର କିମ୍ବା ରାଇଡର ବୁକ୍ କରନ୍ତୁ, କିମ୍ବା WhatsApp ରେ ଯୋଗାଯୋଗ କରନ୍ତୁ।",
+  },
 
   bikes: { en: "Bikes", hi: "बाइक", or: "ବାଇକ୍" },
   cars: { en: "Cars", hi: "कार", or: "କାର୍" },

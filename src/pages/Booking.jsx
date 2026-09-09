@@ -1015,6 +1015,10 @@ export default function Booking() {
             </div>
 
             {/* Bikes, Cars, Buses — plain fleet listing, no separate "service" framing */}
+            <div className="pt-10 px-5 max-w-5xl mx-auto text-center" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+              <p className="font-mono text-xs tracking-widest mb-1.5 mt-4" style={{ color: COLORS.accent }}>{tr("ourFleetHeading")}</p>
+              <p className="text-sm max-w-md mx-auto" style={{ color: COLORS.muted }}>{tr("ourFleetSubtitle")}</p>
+            </div>
             {VEHICLE_CATEGORIES.map((cat) => {
               const allItems = sortListings(allListings[cat.key].filter(matches));
               if (term && allItems.length === 0) return null;
@@ -1300,9 +1304,9 @@ function PhotoCard({ listing, category, colors, stats, bookingCount, popularLabe
           )}
         </div>
       </div>
-      <div className={`${isGrid ? "p-3" : "p-3.5"} flex flex-col flex-1`}>
+      <div className={`${isGrid ? "p-3" : "p-3.5"} flex flex-col ${bookable ? "flex-1" : ""}`}>
         <p className="font-semibold text-sm leading-tight mb-1.5 line-clamp-2" style={{ color: colors.text }}>{listing.name}</p>
-        <p className="font-mono text-sm mb-3">
+        <p className={`font-mono text-sm ${bookable ? "mb-3" : ""}`}>
           <span style={{ color: colors.accent }}>₹{listing.price}</span>
           <span style={{ color: colors.muted }}>{listing.unit}</span>
         </p>
