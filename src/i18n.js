@@ -116,6 +116,30 @@ const STRINGS = {
   aboutThisTour: { en: "About this tour", hi: "इस टूर के बारे में", or: "ଏହି ଟୁର୍ ବିଷୟରେ" },
   whatToKnow: { en: "What to know before you go", hi: "जाने से पहले जान लें", or: "ଯିବା ପୂର୍ବରୁ ଜାଣନ୍ତୁ" },
   bookNow: { en: "Book Now", hi: "अभी बुक करें", or: "ବର୍ତ୍ତମାନ ବୁକ୍ କରନ୍ତୁ" },
+
+  planYourJourney: { en: "PLAN YOUR JOURNEY", hi: "अपनी यात्रा की योजना बनाएं", or: "ଆପଣଙ୍କ ଯାତ୍ରା ଯୋଜନା କରନ୍ତୁ" },
+  whyChooseTitle: { en: "Why Travel With RideLine?", hi: "RideLine के साथ यात्रा क्यों करें?", or: "RideLine ସହିତ କାହିଁକି ଯାତ୍ରା କରିବେ?" },
+  whyChoose1: { en: "Customised Tour Packages", hi: "कस्टमाइज्ड टूर पैकेज", or: "କଷ୍ଟମାଇଜ୍ଡ ଟୁର୍ ପ୍ୟାକେଜ୍" },
+  whyChoose2: { en: "Hassle-Free Travel Planning", hi: "परेशानी मुक्त यात्रा योजना", or: "ଝାମେଲାମୁକ୍ତ ଯାତ୍ରା ଯୋଜନା" },
+  whyChoose3: { en: "Expert Local Guidance", hi: "स्थानीय विशेषज्ञ मार्गदर्शन", or: "ସ୍ଥାନୀୟ ବିଶେଷଜ୍ଞ ମାର୍ଗଦର୍ଶନ" },
+  whyChoose4: { en: "Quick WhatsApp Support", hi: "त्वरित WhatsApp सहायता", or: "ତ୍ୱରିତ WhatsApp ସହାୟତା" },
+
+  aboutTag: { en: "OUR STORY", hi: "हमारी कहानी", or: "ଆମର କାହାଣୀ" },
+  aboutHeading: { en: "Welcome to RideLine", hi: "RideLine में आपका स्वागत है", or: "RideLine କୁ ସ୍ୱାଗତ" },
+  aboutBody: {
+    en: "We started RideLine to make exploring Odisha simple — real local knowledge, honest pricing, and a team that actually picks up the phone. From ancient temples to quiet backwaters, we help you see the state the way we do: unhurried, and worth every mile.",
+    hi: "हमने ओडिशा को आसानी से घूमने के लिए RideLine शुरू किया — असली स्थानीय जानकारी, ईमानदार कीमतें, और एक टीम जो वाकई फोन उठाती है। प्राचीन मंदिरों से लेकर शांत जलमार्गों तक, हम आपको राज्य को उसी तरह दिखाते हैं जैसे हम देखते हैं — बिना जल्दबाजी, और हर मील के लायक।",
+    or: "ଓଡ଼ିଶାକୁ ସହଜରେ ଭ୍ରମଣ କରାଇବା ପାଇଁ ଆମେ RideLine ଆରମ୍ଭ କଲୁ — ପ୍ରକୃତ ସ୍ଥାନୀୟ ଜ୍ଞାନ, ସାଧୁ ମୂଲ୍ୟ, ଏବଂ ଏକ ଦଳ ଯିଏ ପ୍ରକୃତରେ ଫୋନ୍ ଉଠାନ୍ତି। ପ୍ରାଚୀନ ମନ୍ଦିରରୁ ଶାନ୍ତ ଜଳପଥ ପର୍ଯ୍ୟନ୍ତ, ଆମେ ଆପଣଙ୍କୁ ରାଜ୍ୟକୁ ଆମ ପରି ଦେଖାଇବାରେ ସାହାଯ୍ୟ କରୁ — ଅବିରତ, ଏବଂ ପ୍ରତ୍ୟେକ ମାଇଲ ଉପଯୁକ୍ତ।",
+  },
+
+  popularDestHeading: { en: "Popular Destinations", hi: "लोकप्रिय स्थान", or: "ଲୋକପ୍ରିୟ ଗନ୍ତବ୍ୟସ୍ଥଳ" },
+  popularDestSubtitle: { en: "A few favourites from our tours", hi: "हमारे टूर से कुछ पसंदीदा", or: "ଆମର ଟୁର୍ ର କିଛି ପ୍ରିୟ ସ୍ଥାନ" },
+
+  testimonialsHeading: { en: "What Travellers Say", hi: "यात्री क्या कहते हैं", or: "ଯାତ୍ରୀମାନେ କ'ଣ କୁହନ୍ତି" },
+
+  footerQuickLinks: { en: "QUICK LINKS", hi: "त्वरित लिंक", or: "ଦ୍ରୁତ ଲିଙ୍କ୍" },
+  footerFindUs: { en: "FIND US", hi: "हमें खोजें", or: "ଆମକୁ ଖୋଜନ୍ତୁ" },
+  allRightsReserved: { en: "All rights reserved.", hi: "सर्वाधिकार सुरक्षित।", or: "ସର୍ବସ୍ୱତ୍ୱ ସଂରକ୍ଷିତ।" },
 };
 
 export function t(key, lang) {

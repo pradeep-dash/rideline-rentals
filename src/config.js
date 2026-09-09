@@ -4,7 +4,9 @@ export const BUSINESS = {
   whatsapp: "911234567890", // country code + number, no + or spaces
   instagram: "ridelinerentals",
   facebook: "ridelinerentals",
-  location: "MG Road, Bengaluru",
+  // Used in the header, footer, and the map embed — put your real office
+  // address here for the map to point to the right place.
+  location: "Bhubaneswar, Odisha",
 };
 
 export const SLOTS = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00"];

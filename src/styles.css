@@ -35,6 +35,10 @@ body {
 .font-mono {
   font-family: "JetBrains Mono", monospace;
 }
+.font-accent {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+}
 
 input:focus,
 select:focus {
@@ -84,3 +88,4 @@ button {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+

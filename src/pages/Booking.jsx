@@ -88,13 +88,14 @@ function daysBetweenInclusive(startStr, endStr) {
 }
 
 export default function Booking() {
-  const { colors: COLORS } = useTheme();
+  const { colors: COLORS, resolved: themeMode } = useTheme();
   const { lang } = useLanguage();
   const tr = (key) => t(key, lang);
 
   const [allListings, setAllListings] = useState({ bike: [], car: [], bus: [], tour: [], package: [], travel: [] });
   const [reviewStats, setReviewStats] = useState({});
   const [bookingCounts, setBookingCounts] = useState({});
+  const [testimonials, setTestimonials] = useState([]);
   const [loadingListings, setLoadingListings] = useState(true);
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState("default");
@@ -184,10 +185,11 @@ export default function Booking() {
   useEffect(() => {
     (async () => {
       setLoadingListings(true);
-      const [{ data: listingsData }, { data: statsData }, { data: countsData }] = await Promise.all([
+      const [{ data: listingsData }, { data: statsData }, { data: countsData }, { data: testimonialsData }] = await Promise.all([
         supabase.from("listings").select("*").eq("active", true).order("price", { ascending: true }),
         supabase.from("review_stats").select("*"),
         supabase.from("listing_booking_counts").select("*"),
+        supabase.from("reviews").select("customer_name, rating, comment, listings(name)").eq("approved", true).gte("rating", 4).order("created_at", { ascending: false }).limit(6),
       ]);
       const grouped = { bike: [], car: [], bus: [], tour: [], package: [], travel: [] };
       (listingsData || []).forEach((l) => {
@@ -204,6 +206,7 @@ export default function Booking() {
         countsMap[c.listing_id] = c.booking_count;
       });
       setBookingCounts(countsMap);
+      setTestimonials((testimonialsData || []).filter((t) => t.comment));
       setLoadingListings(false);
     })();
   }, []);
@@ -501,20 +504,30 @@ export default function Booking() {
       </header>
 
       {/* Hero */}
-      <section className="relative px-5 pt-7 pb-5 text-center">
+      <section className="relative px-5 pt-14 pb-10 text-center overflow-hidden">
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-4 font-mono text-[10px] tracking-[0.2em]"
-          style={{ background: COLORS.accentSoft, color: COLORS.accent, border: `1px solid rgba(245,183,0,0.25)` }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS.accent }} />
-          {tr("tagline")}
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(20,24,28,0.55) 0%, ${COLORS.bg} 92%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Konark_Sun_Temple_Front_view.jpg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center 30%",
+          }}
+        />
+        <div className="relative z-10">
+          <div
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-4 font-mono text-[10px] tracking-[0.2em]"
+            style={{ background: "rgba(20,24,28,0.55)", color: COLORS.accentBright, border: `1px solid rgba(245,183,0,0.35)`, backdropFilter: "blur(4px)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS.accentBright }} />
+            {tr("tagline")}
+          </div>
+          <h1 className="font-display text-5xl sm:text-7xl leading-none" style={{ color: "#FFFFFF", textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
+            {tr("heroTitle1")} <span style={{ color: COLORS.accentBright }}>{tr("heroTitle2")}</span>
+          </h1>
+          <p className="mt-3 text-base" style={{ color: "#F2F0EA" }}>
+            {tr("heroSubtitle")}
+          </p>
         </div>
-        <h1 className="font-display text-5xl sm:text-7xl leading-none">
-          {tr("heroTitle1")} <span style={{ color: COLORS.accent }}>{tr("heroTitle2")}</span>
-        </h1>
-        <p className="mt-3 text-base" style={{ color: COLORS.muted }}>
-          {tr("heroSubtitle")}
-        </p>
       </section>
 
       {/* Services overview — compact 2x2 summary strip, not a second hero */}
@@ -557,6 +570,74 @@ export default function Booking() {
             <Users size={18} color={COLORS.accent} className="shrink-0" />
             <p className="font-semibold text-xs leading-tight">{tr("serviceGroupTitle")}</p>
           </a>
+        </div>
+      </section>
+
+      {/* Why Travel With Us — trust block */}
+      <section className="px-5 pb-8 max-w-5xl mx-auto">
+        <div
+          className="rounded-3xl p-6 sm:p-8"
+          style={{ background: `linear-gradient(160deg, ${COLORS.surface2}, ${COLORS.surface})`, border: `1px solid ${COLORS.border}` }}
+        >
+          <p className="font-mono text-xs tracking-[0.2em] mb-2" style={{ color: COLORS.accent }}>{tr("planYourJourney")}</p>
+          <h2 className="font-display text-3xl sm:text-4xl mb-5 leading-tight">{tr("whyChooseTitle")}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { icon: Route, label: tr("whyChoose1") },
+              { icon: Check, label: tr("whyChoose2") },
+              { icon: Star, label: tr("whyChoose3") },
+              { icon: MessageCircle, label: tr("whyChoose4") },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: COLORS.accentSoft }}>
+                  <item.icon size={16} color={COLORS.accent} />
+                </div>
+                <span className="text-sm font-medium">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About — narrative section with background photo */}
+      <section className="relative px-5 py-14 mb-8 overflow-hidden">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(20,24,28,0.75) 40%, rgba(20,24,28,0.75) 60%, ${COLORS.bg} 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Boat_ride_on_Chilika_Lake%2C_Balugaon%2C_Odisha%2C_India.jpg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div className="relative z-10 max-w-lg mx-auto text-center">
+          <p className="font-mono text-xs tracking-[0.2em] mb-2" style={{ color: COLORS.accentBright }}>{tr("aboutTag")}</p>
+          <h2 className="font-accent text-3xl sm:text-4xl mb-4" style={{ color: "#FFFFFF" }}>{tr("aboutHeading")}</h2>
+          <p className="text-sm leading-relaxed" style={{ color: "#E8E4DC" }}>{tr("aboutBody")}</p>
+        </div>
+      </section>
+
+      {/* Popular Destinations — decorative circular preview */}
+      <section className="px-5 pb-8 max-w-5xl mx-auto text-center">
+        <p className="font-mono text-xs tracking-widest mb-1" style={{ color: COLORS.muted }}>{tr("popularDestHeading")}</p>
+        <p className="text-sm mb-5" style={{ color: COLORS.muted }}>{tr("popularDestSubtitle")}</p>
+        <div className="flex justify-center gap-4 sm:gap-6 flex-wrap">
+          {[
+            { name: "Lingaraj Temple", url: "https://commons.wikimedia.org/wiki/Special:FilePath/Lingaraj_temple_Bhubaneswar.jpg" },
+            { name: "Konark", url: "https://commons.wikimedia.org/wiki/Special:FilePath/Konark_Sun_Temple_Front_view.jpg" },
+            { name: "Chilika Lake", url: "https://commons.wikimedia.org/wiki/Special:FilePath/Boat_ride_on_Chilika_Lake%2C_Balugaon%2C_Odisha%2C_India.jpg" },
+            { name: "Nandankanan", url: "https://commons.wikimedia.org/wiki/Special:FilePath/White_tiger_at_Nandankanan%2C_Odisha_II.jpg" },
+            { name: "Bhitarkanika", url: "https://commons.wikimedia.org/wiki/Special:FilePath/White_Crocodile_at_Bhitarkanika_National_Park.jpg" },
+          ].map((d) => (
+            <a key={d.name} href="#tour" className="flex flex-col items-center gap-2 w-20">
+              <div
+                className="w-20 h-20 rounded-full overflow-hidden"
+                style={{ border: `2px solid ${COLORS.accent}`, boxShadow: `0 6px 18px ${COLORS.glow}` }}
+              >
+                <img src={d.url} alt={d.name} loading="lazy" className="w-full h-full object-cover" />
+              </div>
+              <span className="text-[11px] font-medium leading-tight">{d.name}</span>
+            </a>
+          ))}
         </div>
       </section>
 
@@ -1065,28 +1146,94 @@ export default function Booking() {
         )}
       </main>
 
+      {/* Testimonials — real approved reviews, only shown once some exist */}
+      {testimonials.length > 0 && (
+        <section className="relative px-5 py-14 overflow-hidden">
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `linear-gradient(180deg, ${COLORS.bg} 0%, rgba(20,24,28,0.8) 35%, rgba(20,24,28,0.8) 65%, ${COLORS.bg} 100%), url('https://commons.wikimedia.org/wiki/Special:FilePath/Similipal.jpg')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="relative z-10 max-w-5xl mx-auto">
+            <p className="font-mono text-xs tracking-widest mb-5 text-center" style={{ color: COLORS.accentBright }}>{tr("testimonialsHeading")}</p>
+            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory no-scrollbar">
+              {testimonials.map((t, i) => (
+                <div
+                  key={i}
+                  className="shrink-0 w-72 snap-start rounded-2xl p-5"
+                  style={{ background: "rgba(28,34,40,0.85)", border: "1px solid rgba(245,183,0,0.2)", backdropFilter: "blur(6px)" }}
+                >
+                  <div className="flex items-center gap-1 mb-2">
+                    {Array.from({ length: 5 }).map((_, si) => (
+                      <Star key={si} size={12} fill={si < t.rating ? COLORS.accentBright : "none"} color={COLORS.accentBright} />
+                    ))}
+                  </div>
+                  <p className="font-accent text-base leading-relaxed mb-3" style={{ color: "#F2F0EA" }}>"{t.comment}"</p>
+                  <p className="text-xs font-mono" style={{ color: "#C9C2B4" }}>{t.customer_name} · {t.listings?.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="px-5 max-w-5xl mx-auto">
         <AdUnit slot={ADSENSE_SLOTS.footer} />
       </div>
 
       {/* Footer */}
-      <footer className="px-6 py-10 flex flex-col items-center gap-5" style={{ borderTop: `1px solid ${COLORS.border}` }}>
-        <p className="font-mono text-xs tracking-widest" style={{ color: COLORS.muted }}>{tr("questionsReachUs")}</p>
-        <div className="flex gap-3 flex-wrap justify-center">
-          <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-            <MessageCircle size={16} color={COLORS.whatsapp} /> WhatsApp
-          </a>
-          <a href={`https://instagram.com/${BUSINESS.instagram}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-            <Instagram size={16} color={COLORS.accent} /> Instagram
-          </a>
-          <a href={`https://facebook.com/${BUSINESS.facebook}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
-            <Facebook size={16} color={COLORS.accent} /> Facebook
-          </a>
+      <footer className="pt-12 pb-8" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+        <div className="px-6 max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-10 mb-10">
+          <div>
+            <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accent }}>{tr("footerQuickLinks")}</p>
+            <div className="flex flex-col gap-2 text-sm">
+              <a href="#tour" style={{ color: COLORS.muted }}>{tr("tours")}</a>
+              <a href="#package" style={{ color: COLORS.muted }}>{tr("packages")}</a>
+              <a href="#travel" style={{ color: COLORS.muted }}>{tr("travels")}</a>
+              <a href="/lookup" className="flex items-center gap-1.5" style={{ color: COLORS.muted }}>
+                <ClipboardList size={13} /> {tr("checkBooking")}
+              </a>
+            </div>
+          </div>
+          <div>
+            <p className="font-mono text-xs tracking-widest mb-3" style={{ color: COLORS.accent }}>{tr("footerFindUs")}</p>
+            <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${COLORS.border}`, height: 160 }}>
+              <iframe
+                title="Location map"
+                width="100%"
+                height="100%"
+                style={{ border: 0, filter: themeMode === "dark" ? "invert(90%) hue-rotate(180deg)" : "none" }}
+                loading="lazy"
+                src={`https://www.google.com/maps?q=${encodeURIComponent(BUSINESS.location)}&output=embed`}
+              />
+            </div>
+            <p className="flex items-center gap-1.5 text-xs mt-2" style={{ color: COLORS.muted }}>
+              <MapPin size={12} /> {BUSINESS.location}
+            </p>
+          </div>
         </div>
-        <a href="/lookup" className="flex items-center gap-1.5 text-xs font-mono" style={{ color: COLORS.muted }}>
-          <ClipboardList size={13} /> {tr("checkBooking")}
-        </a>
-        <a href="/admin/login" className="text-xs font-mono opacity-40" style={{ color: COLORS.muted }}>{tr("admin")}</a>
+
+        <div className="flex flex-col items-center gap-5 px-6">
+          <p className="font-mono text-xs tracking-widest" style={{ color: COLORS.muted }}>{tr("questionsReachUs")}</p>
+          <div className="flex gap-3 flex-wrap justify-center">
+            <a href={`https://wa.me/${BUSINESS.whatsapp}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
+              <MessageCircle size={16} color={COLORS.whatsapp} /> WhatsApp
+            </a>
+            <a href={`https://instagram.com/${BUSINESS.instagram}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
+              <Instagram size={16} color={COLORS.accent} /> Instagram
+            </a>
+            <a href={`https://facebook.com/${BUSINESS.facebook}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold" style={{ background: COLORS.surface2, border: `1px solid ${COLORS.border}`, color: COLORS.text }}>
+              <Facebook size={16} color={COLORS.accent} /> Facebook
+            </a>
+          </div>
+          <a href="/admin/login" className="text-xs font-mono opacity-40" style={{ color: COLORS.muted }}>{tr("admin")}</a>
+          <p className="text-[11px] font-mono opacity-50 text-center">
+            © {new Date().getFullYear()} {BUSINESS.name}. {tr("allRightsReserved")}
+          </p>
+        </div>
       </footer>
 
       {/* Floating Trip Builder button */}
